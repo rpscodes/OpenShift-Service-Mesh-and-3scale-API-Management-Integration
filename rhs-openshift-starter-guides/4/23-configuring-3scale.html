@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Configuring 3Scale Product for OIDC :: OpenShift Starter Guides</title>
+    <link rel="canonical" href="http://redhat-scholars.github.io/openshift-starter-guides/rhs-openshift-starter-guides/4/23-configuring-3scale.html">
+    <link rel="prev" href="22-sso-setup.html">
+    <link rel="next" href="24-enable-api-mgmt-bookinfo.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../../_/css/site.css">
+<link rel="icon" href="../../_/img/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () { 
+      const urlParams = new URLSearchParams(window.location.search);
+      const clusterName = urlParams.get('CLUSTER_WILDCARD_URL');
+      const projectName = urlParams.get('PROJECT');
+      if (clusterName) {
+        showCluster( clusterName );
+      }
+      else {
+        showClusterForm();
+      }
+
+      if (projectName) {
+        showProject( projectName );
+      } else {
+        showProjectForm();
+      }
+    } );
+
+
+    function sliceCluster(clusterName){
+      if (clusterName.length > 70) {
+          return "..." + clusterName.slice(35);
+      } else {
+          return clusterName;
+      }
+    }
+
+    function showCluster( clusterName ) {
+      document.getElementById('navbar-form-empty').style.display = "none";
+      document.getElementById('navbar-form-filled').style.display = "flex";
+      document.getElementById('cluster_subdomain').textContent = sliceCluster(clusterName);
+      document.getElementById('clusterfield2').value = clusterName;
+
+    }
+
+    function showClusterForm( clusterName ) {
+      document.getElementById('navbar-form-empty').style.display = "flex";
+      document.getElementById('navbar-form-filled').style.display = "none";
+    }
+
+    function gowithcluster() {
+      elClusterInput = document.getElementById('clusterfield');
+      elProjectInput = document.getElementById('projectfield2');
+
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+    }
+
+    function showProject( projectName ) {
+      document.getElementById('navbar-form-project-empty').style.display = "none";
+      document.getElementById('navbar-form-project-filled').style.display = "flex";
+      document.getElementById('project').textContent = projectName;
+      document.getElementById('projectfield2').value = projectName;
+    }
+
+    function showProjectForm( projectName ) {
+      document.getElementById('navbar-form-project-empty').style.display = "flex";
+      document.getElementById('navbar-form-project-filled').style.display = "none";
+    }
+
+    function gowithproject() {
+      elProjectInput = document.getElementById('projectfield');
+      elClusterInput = document.getElementById('clusterfield2');
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+    }
+
+  </script>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img
+          src="../../_/img/header_logo.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" href="http://redhat-scholars.github.io/openshift-starter-guides">OpenShift Starter Guides</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item" id="navbar-form-empty">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+
+          <form action="javascript:void(0);" onsubmit="gowithcluster();">
+            <input size="40" id="clusterfield" type="text" placeholder="Enter OpenShift Cluster Wildcard DNS">
+            <input type="hidden" id="projectfield2" name="projectfield2" value="">
+          </form>
+        </div>
+
+        <div class="navbar-item" id="navbar-form-filled" style="display: none;">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">|</span>
+          <span class="navbar-text" id="cluster_subdomain"></span>
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i onclick="recycle();" style="color: green;" class="fa fa-recycle" aria-hidden="true"></i></span>
+        </div>
+
+         <div class="navbar-item" id="navbar-form-project-empty">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+
+          <form action="javascript:void(0);" onsubmit="gowithproject();">
+            <input size="40" id="projectfield" type="text" placeholder="Enter Project Name">
+            <input type="hidden" id="clusterfield2" name="clusterfield2" value="">
+          </form>
+        </div>
+
+        <div class="navbar-item" id="navbar-form-project-filled" style="display: none;">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">|</span>
+          <span class="navbar-text" id="project"></span>
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i onclick="recycle();" style="color: green;" class="fa fa-recycle" aria-hidden="true"></i></span>
+        </div>
+
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-scholars.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-scholars.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-scholars.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header><div class="body">
+<div class="nav-container" data-component="rhs-openshift-starter-guides" data-version="4">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="introduction.html" class=" query-params-link">OpenShift Service Mesh and 3scale API Management Integration</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="introduction.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-path1.html">Path1 - Authentication Using API Key</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-3scale-installation.html">3scale Installation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-service-mesh-installation.html">Service Mesh Installation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-provision-bookInfo.html">Provision the BookInfo Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="05-configuring-3scale.html">Configuring 3scale</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="06-enable-api-mgmt-bookinfo.html">Enable API Management</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="21-path2.html">Path2 - Authentication Using OIDC</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="22-sso-setup.html">Red Hat SSO Setup</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="23-configuring-3scale.html">Configuring 3Scale Product for OIDC</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="24-enable-api-mgmt-bookinfo.html">Enable API Management for bookinfo - OIDC scenario</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">OpenShift Service Mesh and 3scale API Management Integration</span>
+    <span class="version">4</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">OpenShift Service Mesh and 3scale API Management Integration</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="introduction.html">4</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="introduction.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="introduction.html">OpenShift Service Mesh and 3scale API Management Integration</a></li>
+    <li><a href="21-path2.html">Path2 - Authentication Using OIDC</a></li>
+    <li><a href="23-configuring-3scale.html">Configuring 3Scale Product for OIDC</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/rpscodes/OpenShift-Service-Mesh-and-3scale-API-Management-Integration/edit/master/documentation/modules/ROOT/pages/23-configuring-3scale.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Configuring 3Scale Product for OIDC</h1>
+<div class="sect1">
+<h2 id="overview"><a class="anchor" href="#overview"></a>3scale Product Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A 3scale product is a customer facing API. Products facilitate the creation of strong and simplified offerings for API consumers. In this section we will configure a 3scale product. Later we will use the Istio Ingress to the BookInfo application (created in the previous step) directly as an API Product in 3scale, using the 3scale Istio WASM module</p>
+</div>
+<div class="sect2">
+<h3 id="3scale-login"><a class="anchor" href="#3scale-login"></a>Login to 3scale</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If you are not already logged into 3scale, please follow these steps. Log into 3scale using the below URL.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-weblink hljs" data-lang="weblink"><a href="https://3scale-admin.%CLUSTER_WILDCARD_URL%" class="bare">https://3scale-admin.%CLUSTER_WILDCARD_URL%</a></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>You can retrieve the login credentials using the OpenShift Console UI. Select 3scale project and Navigate to Developer &gt; Secrets and search for <strong>system-seed</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/seed-nav.png" alt="seed nav">
+</div>
+</div>
+</li>
+<li>
+<p>From the <strong>system-seed</strong> secret you can retrieve the admin_access_token (we will use this later in our lab), admin_user, admin_password used to login to 3scale. Login to the 3scale admin portal by using the admin_user and admin_password.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/admin-cred.png" alt="admin cred">
+</div>
+</div>
+</li>
+<li>
+<p>Once you login to the 3scale admin portal, close the on boarding Wizard to land directly on the dashboard.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/onboarding-3scale.png" alt="onboarding 3scale">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="3scale-product"><a class="anchor" href="#3scale-product"></a>Create a 3scale Product</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>From the 3scale Dashboard, Click on <strong>Create Product</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/create-prod.png" alt="create prod">
+</div>
+</div>
+</li>
+<li>
+<p>You can give the product any name. Let&#8217;s name the product <strong>wasm-oidc-demo</strong> and click on <strong>Create Product</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/wasm-oidc-demo.png" alt="wasm oidc demo">
+</div>
+</div>
+</li>
+<li>
+<p>Go to Integration&#8594;Settings and choose Istio as the deployment. Under Authentication select <strong>OpenID Connect Use OpenID Connect for any OAuth 2.0 flow</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/istio-oidc.png" alt="istio oidc">
+</div>
+</div>
+</li>
+<li>
+<p>On the same screen under <strong>OPENID CONNECT (OIDC) BASICS</strong> enter the <code><a href="https://3scale-zync:zync-secret@keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale" class="bare">https://3scale-zync:zync-secret@keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale</a></code> in the OpenID Connect Issuer text box.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/kc-url.png" alt="kc url">
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If the Keycloak URL is not populated correctly above, it can be obtained using the below command</p>
+</div>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route keycloak -o jsonpath="{.spec.host}{.spec.path}" -n keycloak</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>On the same screen under <strong>OPENID Authorization Flow</strong> Select Authorization Code Flow and Service Accounts Flow. Click Update Product at the bottom of the screen</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/authflow.png" alt="authflow">
+</div>
+</div>
+</li>
+<li>
+<p>Go to Integration&#8594;Configuration and Hit <strong>Update Configuration</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/oidc-update-config.png" alt="oidc update config">
+</div>
+</div>
+</li>
+<li>
+<p>Go to Application &gt; Application plans and Click <strong>Create Application Plan</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/oidc-create-app-plan.png" alt="oidc create app plan">
+</div>
+</div>
+</li>
+<li>
+<p>You can give the plan any name. Let&#8217;s name the plan <strong>wasm-oidc-basic</strong> and Click <strong>Create Application Plan</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/oidc-plan-screen.png" alt="oidc plan screen">
+</div>
+</div>
+</li>
+<li>
+<p>Click on the plan name to add rate limiting</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/oidc-plan-name.png" alt="oidc plan name">
+</div>
+</div>
+</li>
+<li>
+<p>Scroll down and click on Limits and then on <strong>New usage limit</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/new-usage-limit.png" alt="new usage limit">
+</div>
+</div>
+</li>
+<li>
+<p>Select minute from the period and set the Max value as 8 .This means that users will be restricted to 8 call/min when they call the API . Click on <strong>create usage limit</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/limit-8.png" alt="limit 8">
+</div>
+</div>
+</li>
+<li>
+<p>Scroll back up and click on <strong>Update Application Plan</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/update-app-plan.png" alt="update app plan">
+</div>
+</div>
+</li>
+<li>
+<p>Click on the Kebab menu and publish the Application Plan.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/publish_kebab.png" alt="publish kebab">
+</div>
+</div>
+</li>
+<li>
+<p>Go to the Product Overview and take note of the ID given to the API Product(This will be used in later steps)</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/prod-id-oidc.png" alt="prod id oidc">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>After completion please proceed to next section:</p>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="22-sso-setup.html" class="query-params-link">Red Hat SSO Setup</a></span>
+  <span class="next"><a href="24-enable-api-mgmt-bookinfo.html" class="query-params-link">Enable API Management for bookinfo - OIDC scenario</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../../_/js/vendor/clipboard.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

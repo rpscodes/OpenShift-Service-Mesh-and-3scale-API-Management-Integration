@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Service Mesh Setup :: OpenShift Starter Guides</title>
+    <link rel="canonical" href="http://redhat-scholars.github.io/openshift-starter-guides/rhs-openshift-starter-guides/4/03-service-mesh-installation.html">
+    <link rel="prev" href="02-3scale-installation.html">
+    <link rel="next" href="04-provision-bookInfo.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../../_/css/site.css">
+<link rel="icon" href="../../_/img/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () { 
+      const urlParams = new URLSearchParams(window.location.search);
+      const clusterName = urlParams.get('CLUSTER_WILDCARD_URL');
+      const projectName = urlParams.get('PROJECT');
+      if (clusterName) {
+        showCluster( clusterName );
+      }
+      else {
+        showClusterForm();
+      }
+
+      if (projectName) {
+        showProject( projectName );
+      } else {
+        showProjectForm();
+      }
+    } );
+
+
+    function sliceCluster(clusterName){
+      if (clusterName.length > 70) {
+          return "..." + clusterName.slice(35);
+      } else {
+          return clusterName;
+      }
+    }
+
+    function showCluster( clusterName ) {
+      document.getElementById('navbar-form-empty').style.display = "none";
+      document.getElementById('navbar-form-filled').style.display = "flex";
+      document.getElementById('cluster_subdomain').textContent = sliceCluster(clusterName);
+      document.getElementById('clusterfield2').value = clusterName;
+
+    }
+
+    function showClusterForm( clusterName ) {
+      document.getElementById('navbar-form-empty').style.display = "flex";
+      document.getElementById('navbar-form-filled').style.display = "none";
+    }
+
+    function gowithcluster() {
+      elClusterInput = document.getElementById('clusterfield');
+      elProjectInput = document.getElementById('projectfield2');
+
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+    }
+
+    function showProject( projectName ) {
+      document.getElementById('navbar-form-project-empty').style.display = "none";
+      document.getElementById('navbar-form-project-filled').style.display = "flex";
+      document.getElementById('project').textContent = projectName;
+      document.getElementById('projectfield2').value = projectName;
+    }
+
+    function showProjectForm( projectName ) {
+      document.getElementById('navbar-form-project-empty').style.display = "flex";
+      document.getElementById('navbar-form-project-filled').style.display = "none";
+    }
+
+    function gowithproject() {
+      elProjectInput = document.getElementById('projectfield');
+      elClusterInput = document.getElementById('clusterfield2');
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+    }
+
+  </script>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img
+          src="../../_/img/header_logo.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" href="http://redhat-scholars.github.io/openshift-starter-guides">OpenShift Starter Guides</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item" id="navbar-form-empty">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+
+          <form action="javascript:void(0);" onsubmit="gowithcluster();">
+            <input size="40" id="clusterfield" type="text" placeholder="Enter OpenShift Cluster Wildcard DNS">
+            <input type="hidden" id="projectfield2" name="projectfield2" value="">
+          </form>
+        </div>
+
+        <div class="navbar-item" id="navbar-form-filled" style="display: none;">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">|</span>
+          <span class="navbar-text" id="cluster_subdomain"></span>
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i onclick="recycle();" style="color: green;" class="fa fa-recycle" aria-hidden="true"></i></span>
+        </div>
+
+         <div class="navbar-item" id="navbar-form-project-empty">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+
+          <form action="javascript:void(0);" onsubmit="gowithproject();">
+            <input size="40" id="projectfield" type="text" placeholder="Enter Project Name">
+            <input type="hidden" id="clusterfield2" name="clusterfield2" value="">
+          </form>
+        </div>
+
+        <div class="navbar-item" id="navbar-form-project-filled" style="display: none;">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">|</span>
+          <span class="navbar-text" id="project"></span>
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i onclick="recycle();" style="color: green;" class="fa fa-recycle" aria-hidden="true"></i></span>
+        </div>
+
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-scholars.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-scholars.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-scholars.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header><div class="body">
+<div class="nav-container" data-component="rhs-openshift-starter-guides" data-version="4">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="introduction.html" class=" query-params-link">OpenShift Service Mesh and 3scale API Management Integration</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="introduction.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-path1.html">Path1 - Authentication Using API Key</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-3scale-installation.html">3scale Installation</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="03-service-mesh-installation.html">Service Mesh Installation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-provision-bookInfo.html">Provision the BookInfo Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="05-configuring-3scale.html">Configuring 3scale</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="06-enable-api-mgmt-bookinfo.html">Enable API Management</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="21-path2.html">Path2 - Authentication Using OIDC</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="22-sso-setup.html">Red Hat SSO Setup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="23-configuring-3scale.html">Configuring 3Scale Product for OIDC</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="24-enable-api-mgmt-bookinfo.html">Enable API Management for bookinfo - OIDC scenario</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">OpenShift Service Mesh and 3scale API Management Integration</span>
+    <span class="version">4</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">OpenShift Service Mesh and 3scale API Management Integration</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="introduction.html">4</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="introduction.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="introduction.html">OpenShift Service Mesh and 3scale API Management Integration</a></li>
+    <li><a href="01-path1.html">Path1 - Authentication Using API Key</a></li>
+    <li><a href="03-service-mesh-installation.html">Service Mesh Installation</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/rpscodes/OpenShift-Service-Mesh-and-3scale-API-Management-Integration/edit/master/documentation/modules/ROOT/pages/03-service-mesh-installation.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Service Mesh Setup</h1>
+<div class="sect1">
+<h2 id="controlplane"><a class="anchor" href="#controlplane"></a>Service Mesh Control Plane Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We will be installing Elasticsearch, Jaeger, and Kiali for tracing and monitoring purposes. These are not mandatory for a general service mesh installation but are helpful in tracing the route of the calls, monitoring the mesh etc.</p>
+</div>
+<div class="sect2">
+<h3 id="elastic"><a class="anchor" href="#elastic"></a>Elastic Search Operator Installation</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>On your OpenShift Console UI, navigate to Administrator &gt; Operators &gt; OperatorHub and search for <strong>OpenShift Elastic Operator</strong>. Select the Operator and Click Install.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elastic-operator-search.png" alt="elastic operator search">
+</div>
+</div>
+</li>
+<li>
+<p>Leave all the values as Default and click on install. Double check if the 'All namespaces' radio button is checked.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/elastic-operator.png" alt="elastic operator">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="jaeger"><a class="anchor" href="#jaeger"></a>Jaeger Operator Installation</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Repeat the process for Jaeger Operator. On your OpenShift Console UI, navigate to Administrator &gt; Operators &gt; OperatorHub and search for <strong>Red Hat OpenShift distributed tracing platform</strong>. Select the Operator and Click Install</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/jaeger-search.png" alt="jaeger search">
+</div>
+</div>
+</li>
+<li>
+<p>Leave all the values as Default and click on install. Double check if the 'All namespaces' radio button is checked.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/jaeger-install.png" alt="jaeger install">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="kiali"><a class="anchor" href="#kiali"></a>Kiali Operator Installation</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Repeat the process for Kiali Operator. On your OpenShift Console UI, navigate to Administrator &gt; Operators &gt; OperatorHub and search for <strong>Kiali</strong>. Select the Kiali Operator by Red Hat and Click Install</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/kiali-search.png" alt="kiali search">
+</div>
+</div>
+</li>
+<li>
+<p>Leave all the values as Default and click on install. Double check if the 'All namespaces' radio button is checked.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/kiali-install.png" alt="kiali install">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_openshift_service_mesh_operator_installation"><a class="anchor" href="#_openshift_service_mesh_operator_installation"></a>OpenShift Service Mesh Operator Installation</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Repeat the process for Service Mesh Operator. On your OpenShift Console UI, navigate to Administrator &gt; Operators &gt; OperatorHub and search for <strong>Red Hat OpenShift Service Mesh</strong>. Select the Operator and Click Install</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/ossm-search.png" alt="ossm search">
+</div>
+</div>
+</li>
+<li>
+<p>Leave all the values as Default and click on install. Double check if the 'All namespaces' radio button is checked. Wait for the operator installation to complete</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/ossm-install.png" alt="ossm install">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>After all you have installed all four Operators, click Operators → Installed Operators to verify that your Operators installed</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="create-control-plane"><a class="anchor" href="#create-control-plane"></a>Create Control Plane</h3>
+<div class="paragraph">
+<p>The control plane manages and configures the proxies that make up the data plane. It is the authoritative source for configuration, manages access control and usage policies, and collects metrics from the proxies in the service mesh. You can deploy a basic ServiceMeshControlPlane by using the web console or CLI. We will be using the CLI for our demo.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Open the terminal on your workstation. SSH into the cluster bastion via the credentials you obtained in your welcome email which should look like the images below</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/welcome-email.png" alt="welcome email">
+</div>
+</div>
+</li>
+<li>
+<p>Create new project with the name 'istio-system'</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-project istio-system</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a Custom Resource Definition file for the Control Plane with name <code>ServiceMeshControlPlane_basic.yaml</code> using vim or any other editor on the cli. Copy paste the below yaml into the file and save it.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+spec:
+  addons:
+    grafana:
+      enabled: true
+    jaeger:
+      install:
+        storage:
+          type: Memory
+    kiali:
+      enabled: true
+    prometheus:
+      enabled: true
+  policy:
+    type: Istiod
+  profiles:
+    - default
+  telemetry:
+    type: Istiod
+  tracing:
+    sampling: 10000
+    type: Jaeger
+  version: v2.1</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Apply the CRD to your cluster using the below command</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">oc apply -f ServiceMeshControlPlane_basic.yaml -n istio-system</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>After completion please proceed to next section:</p>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="02-3scale-installation.html" class="query-params-link">3scale Installation</a></span>
+  <span class="next"><a href="04-provision-bookInfo.html" class="query-params-link">Provision the BookInfo Application</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../../_/js/vendor/clipboard.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

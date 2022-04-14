@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Provision BookInfo :: OpenShift Starter Guides</title>
+    <link rel="canonical" href="http://redhat-scholars.github.io/openshift-starter-guides/rhs-openshift-starter-guides/4/04-provision-bookInfo.html">
+    <link rel="prev" href="03-service-mesh-installation.html">
+    <link rel="next" href="05-configuring-3scale.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../../_/css/site.css">
+<link rel="icon" href="../../_/img/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () { 
+      const urlParams = new URLSearchParams(window.location.search);
+      const clusterName = urlParams.get('CLUSTER_WILDCARD_URL');
+      const projectName = urlParams.get('PROJECT');
+      if (clusterName) {
+        showCluster( clusterName );
+      }
+      else {
+        showClusterForm();
+      }
+
+      if (projectName) {
+        showProject( projectName );
+      } else {
+        showProjectForm();
+      }
+    } );
+
+
+    function sliceCluster(clusterName){
+      if (clusterName.length > 70) {
+          return "..." + clusterName.slice(35);
+      } else {
+          return clusterName;
+      }
+    }
+
+    function showCluster( clusterName ) {
+      document.getElementById('navbar-form-empty').style.display = "none";
+      document.getElementById('navbar-form-filled').style.display = "flex";
+      document.getElementById('cluster_subdomain').textContent = sliceCluster(clusterName);
+      document.getElementById('clusterfield2').value = clusterName;
+
+    }
+
+    function showClusterForm( clusterName ) {
+      document.getElementById('navbar-form-empty').style.display = "flex";
+      document.getElementById('navbar-form-filled').style.display = "none";
+    }
+
+    function gowithcluster() {
+      elClusterInput = document.getElementById('clusterfield');
+      elProjectInput = document.getElementById('projectfield2');
+
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+    }
+
+    function showProject( projectName ) {
+      document.getElementById('navbar-form-project-empty').style.display = "none";
+      document.getElementById('navbar-form-project-filled').style.display = "flex";
+      document.getElementById('project').textContent = projectName;
+      document.getElementById('projectfield2').value = projectName;
+    }
+
+    function showProjectForm( projectName ) {
+      document.getElementById('navbar-form-project-empty').style.display = "flex";
+      document.getElementById('navbar-form-project-filled').style.display = "none";
+    }
+
+    function gowithproject() {
+      elProjectInput = document.getElementById('projectfield');
+      elClusterInput = document.getElementById('clusterfield2');
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+    }
+
+  </script>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img
+          src="../../_/img/header_logo.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" href="http://redhat-scholars.github.io/openshift-starter-guides">OpenShift Starter Guides</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item" id="navbar-form-empty">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+
+          <form action="javascript:void(0);" onsubmit="gowithcluster();">
+            <input size="40" id="clusterfield" type="text" placeholder="Enter OpenShift Cluster Wildcard DNS">
+            <input type="hidden" id="projectfield2" name="projectfield2" value="">
+          </form>
+        </div>
+
+        <div class="navbar-item" id="navbar-form-filled" style="display: none;">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">|</span>
+          <span class="navbar-text" id="cluster_subdomain"></span>
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i onclick="recycle();" style="color: green;" class="fa fa-recycle" aria-hidden="true"></i></span>
+        </div>
+
+         <div class="navbar-item" id="navbar-form-project-empty">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+
+          <form action="javascript:void(0);" onsubmit="gowithproject();">
+            <input size="40" id="projectfield" type="text" placeholder="Enter Project Name">
+            <input type="hidden" id="clusterfield2" name="clusterfield2" value="">
+          </form>
+        </div>
+
+        <div class="navbar-item" id="navbar-form-project-filled" style="display: none;">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">|</span>
+          <span class="navbar-text" id="project"></span>
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i onclick="recycle();" style="color: green;" class="fa fa-recycle" aria-hidden="true"></i></span>
+        </div>
+
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-scholars.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-scholars.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-scholars.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header><div class="body">
+<div class="nav-container" data-component="rhs-openshift-starter-guides" data-version="4">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="introduction.html" class=" query-params-link">OpenShift Service Mesh and 3scale API Management Integration</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="introduction.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-path1.html">Path1 - Authentication Using API Key</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-3scale-installation.html">3scale Installation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-service-mesh-installation.html">Service Mesh Installation</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="04-provision-bookInfo.html">Provision the BookInfo Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="05-configuring-3scale.html">Configuring 3scale</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="06-enable-api-mgmt-bookinfo.html">Enable API Management</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="21-path2.html">Path2 - Authentication Using OIDC</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="22-sso-setup.html">Red Hat SSO Setup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="23-configuring-3scale.html">Configuring 3Scale Product for OIDC</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="24-enable-api-mgmt-bookinfo.html">Enable API Management for bookinfo - OIDC scenario</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">OpenShift Service Mesh and 3scale API Management Integration</span>
+    <span class="version">4</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">OpenShift Service Mesh and 3scale API Management Integration</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="introduction.html">4</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="introduction.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="introduction.html">OpenShift Service Mesh and 3scale API Management Integration</a></li>
+    <li><a href="01-path1.html">Path1 - Authentication Using API Key</a></li>
+    <li><a href="04-provision-bookInfo.html">Provision the BookInfo Application</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/rpscodes/OpenShift-Service-Mesh-and-3scale-API-Management-Integration/edit/master/documentation/modules/ROOT/pages/04-provision-bookInfo.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Provision BookInfo</h1>
+<div class="sect1">
+<h2 id="overview"><a class="anchor" href="#overview"></a>BookInfo Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Bookinfo is a sample microservice architecture application that we&#8217;ll be using for our workshop.The application provides details about the book such as publisher details, overview, reviews and ratings through the microservices. The BookInfo Application is deployed to bookinfo namespace</p>
+</div>
+<div class="sect2">
+<h3 id="deploy"><a class="anchor" href="#deploy"></a>Deploy BookInfo</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create new project with the name 'bookinfo'</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc new-project bookinfo</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>By creating a ServiceMeshMemberRoll resource and specifying the namespaces where your content is located, we can add applications, workloads, or services to your mesh .</p>
+</li>
+<li>
+<p>Create a Custom Resource Definition file for the Control Plane with name <code>ServiceMeshMemberRoll_default.yaml</code> using vim or any other editor on the CLI. Copy paste the below yaml into the file and save it.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: default
+spec:
+  members:
+    - bookinfo</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Apply the CRD to your cluster using the below command</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f ServiceMeshMemberRoll_default.yaml -n istio-system</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Provision the application by using the below commands.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f <a href="https://raw.githubusercontent.com/maistra/istio/maistra-2.1/samples/bookinfo/platform/kube/bookinfo.yaml" class="bare">https://raw.githubusercontent.com/maistra/istio/maistra-2.1/samples/bookinfo/platform/kube/bookinfo.yaml</a> -n bookinfo
+oc apply -f <a href="https://raw.githubusercontent.com/maistra/istio/maistra-2.1/samples/bookinfo/networking/bookinfo-gateway.yaml" class="bare">https://raw.githubusercontent.com/maistra/istio/maistra-2.1/samples/bookinfo/networking/bookinfo-gateway.yaml</a> -n bookinfo</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>You can now verify that the bookinfo service is responding by using reqbin.</p>
+</li>
+<li>
+<p>Open a browser window and navigate to:</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-weblink hljs" data-lang="weblink"><a href="https://reqbin.com/curl" class="bare">https://reqbin.com/curl</a></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Copy and paste the below command.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -v <a href="http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/productpage" class="bare">http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/productpage</a></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><em>If the CLuster URL is not populated, you can also retrieve the <strong>cluster wildcard url</strong> using the below command</em></p>
+</div>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get ingresscontroller default -n openshift-ingress-operator -o json | jq -r '.status.domain'</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>You should see 200 (OK) status</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/reqbin-istio.png" alt="reqbin istio">
+</div>
+</div>
+</li>
+<li>
+<p>Send the request 10 times to the product page to generate traffic</p>
+</li>
+<li>
+<p>Open the Kiali Console with URL given below  and login using your OpenShift Cluster Credentials given to you as a part of your welcome email.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-weblink hljs" data-lang="weblink"><a href="https://kiali-istio-system.%CLUSTER_WILDCARD_URL%" class="bare">https://kiali-istio-system.%CLUSTER_WILDCARD_URL%</a></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Navigate to Graph and Select all Namespaces</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/kiali-all-namespaces.png" alt="kiali all namespaces">
+</div>
+</div>
+</li>
+<li>
+<p>You should be able to see the traffic from istio-gateway to the bookinfo application as shown below:</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/kiali-traffic.png" alt="kiali traffic">
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="literalblock">
+<div class="content">
+<pre>If you are unable to see the traffic go back to the reqbin browser
+and generate more traffic (Repeat steps 7 &amp; 8)</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>You can also trace the calls using Jaeger if you choose to. Open the Jaeger Console with URL given below and login using your OpenShift Cluster Credentials given to you as a part of your welcome email.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-weblink hljs" data-lang="weblink"><a href="https://jaeger-istio-system.%CLUSTER_WILDCARD_URL%" class="bare">https://jaeger-istio-system.%CLUSTER_WILDCARD_URL%</a></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Chose Allow selected permissions</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/jaeger-permission.png" alt="jaeger permission">
+</div>
+</div>
+</li>
+<li>
+<p>Select the productpage.bookinfo service and click on 'Find Traces'</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/jaeger-service-search.png" alt="jaeger service search">
+</div>
+</div>
+</li>
+<li>
+<p>Click on any of the search results and you should be able to find the traces as shown in the image below</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/jaeger-traces.png" alt="jaeger traces">
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>After completion please proceed to next section:</p>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="03-service-mesh-installation.html" class="query-params-link">Service Mesh Installation</a></span>
+  <span class="next"><a href="05-configuring-3scale.html" class="query-params-link">Configuring 3scale</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../../_/js/vendor/clipboard.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

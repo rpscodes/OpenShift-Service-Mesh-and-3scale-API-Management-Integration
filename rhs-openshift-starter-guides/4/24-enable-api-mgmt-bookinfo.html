@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Enable API Management for bookinfo - OIDC scenario :: OpenShift Starter Guides</title>
+    <link rel="canonical" href="http://redhat-scholars.github.io/openshift-starter-guides/rhs-openshift-starter-guides/4/24-enable-api-mgmt-bookinfo.html">
+    <link rel="prev" href="23-configuring-3scale.html">
+    <meta name="generator" content="Antora 3.0.0">
+    <link rel="stylesheet" href="../../_/css/site.css">
+<link rel="icon" href="../../_/img/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () { 
+      const urlParams = new URLSearchParams(window.location.search);
+      const clusterName = urlParams.get('CLUSTER_WILDCARD_URL');
+      const projectName = urlParams.get('PROJECT');
+      if (clusterName) {
+        showCluster( clusterName );
+      }
+      else {
+        showClusterForm();
+      }
+
+      if (projectName) {
+        showProject( projectName );
+      } else {
+        showProjectForm();
+      }
+    } );
+
+
+    function sliceCluster(clusterName){
+      if (clusterName.length > 70) {
+          return "..." + clusterName.slice(35);
+      } else {
+          return clusterName;
+      }
+    }
+
+    function showCluster( clusterName ) {
+      document.getElementById('navbar-form-empty').style.display = "none";
+      document.getElementById('navbar-form-filled').style.display = "flex";
+      document.getElementById('cluster_subdomain').textContent = sliceCluster(clusterName);
+      document.getElementById('clusterfield2').value = clusterName;
+
+    }
+
+    function showClusterForm( clusterName ) {
+      document.getElementById('navbar-form-empty').style.display = "flex";
+      document.getElementById('navbar-form-filled').style.display = "none";
+    }
+
+    function gowithcluster() {
+      elClusterInput = document.getElementById('clusterfield');
+      elProjectInput = document.getElementById('projectfield2');
+
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+    }
+
+    function showProject( projectName ) {
+      document.getElementById('navbar-form-project-empty').style.display = "none";
+      document.getElementById('navbar-form-project-filled').style.display = "flex";
+      document.getElementById('project').textContent = projectName;
+      document.getElementById('projectfield2').value = projectName;
+    }
+
+    function showProjectForm( projectName ) {
+      document.getElementById('navbar-form-project-empty').style.display = "flex";
+      document.getElementById('navbar-form-project-filled').style.display = "none";
+    }
+
+    function gowithproject() {
+      elProjectInput = document.getElementById('projectfield');
+      elClusterInput = document.getElementById('clusterfield2');
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+    }
+
+  </script>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://developers.redhat.com" target="_blank"><img
+          src="../../_/img/header_logo.png" height="40px" alt="Red Hat Developer Program"></a>
+      <a class="navbar-item" href="http://redhat-scholars.github.io/openshift-starter-guides">OpenShift Starter Guides</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item" id="navbar-form-empty">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+
+          <form action="javascript:void(0);" onsubmit="gowithcluster();">
+            <input size="40" id="clusterfield" type="text" placeholder="Enter OpenShift Cluster Wildcard DNS">
+            <input type="hidden" id="projectfield2" name="projectfield2" value="">
+          </form>
+        </div>
+
+        <div class="navbar-item" id="navbar-form-filled" style="display: none;">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">|</span>
+          <span class="navbar-text" id="cluster_subdomain"></span>
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i onclick="recycle();" style="color: green;" class="fa fa-recycle" aria-hidden="true"></i></span>
+        </div>
+
+         <div class="navbar-item" id="navbar-form-project-empty">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+
+          <form action="javascript:void(0);" onsubmit="gowithproject();">
+            <input size="40" id="projectfield" type="text" placeholder="Enter Project Name">
+            <input type="hidden" id="clusterfield2" name="clusterfield2" value="">
+          </form>
+        </div>
+
+        <div class="navbar-item" id="navbar-form-project-filled" style="display: none;">
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">|</span>
+          <span class="navbar-text" id="project"></span>
+          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i onclick="recycle();" style="color: green;" class="fa fa-recycle" aria-hidden="true"></i></span>
+        </div>
+
+        <a class="navbar-item" href="https://developers.redhat.com/ebooks/" target="_blank">Books</a>
+        <a class="navbar-item" href="https://developers.redhat.com/cheatsheets/" target="_blank">Cheat Sheets</a>
+        <a class="navbar-item" href="https://developers.redhat.com/events/" target="_blank">Upcoming Events</a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Tutorials</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://redhat-scholars.github.io/kubernetes-tutorial/" target="_blank">Kubernetes</a>
+            <a class="navbar-item" href="https://redhat-scholars.github.io/istio-tutorial/" target="_blank">Istio</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/quarkus-tutorial/" target="_blank">Quarkus</a>
+            <a class="navbar-item" href="https://redhat-developer-demos.github.io/knative-tutorial/" target="_blank">Knative</a>
+            <a class="navbar-item" href="https://redhat-scholars.github.io/tekton-tutorial/" target="_blank">Tekton</a>
+          </div>
+      </div>
+    </div>
+  </nav>
+</header><div class="body">
+<div class="nav-container" data-component="rhs-openshift-starter-guides" data-version="4">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="introduction.html" class=" query-params-link">OpenShift Service Mesh and 3scale API Management Integration</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="introduction.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="01-path1.html">Path1 - Authentication Using API Key</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="02-3scale-installation.html">3scale Installation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="03-service-mesh-installation.html">Service Mesh Installation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="04-provision-bookInfo.html">Provision the BookInfo Application</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="05-configuring-3scale.html">Configuring 3scale</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="06-enable-api-mgmt-bookinfo.html">Enable API Management</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="21-path2.html">Path2 - Authentication Using OIDC</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="22-sso-setup.html">Red Hat SSO Setup</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="23-configuring-3scale.html">Configuring 3Scale Product for OIDC</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="24-enable-api-mgmt-bookinfo.html">Enable API Management for bookinfo - OIDC scenario</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">OpenShift Service Mesh and 3scale API Management Integration</span>
+    <span class="version">4</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <span class="title">OpenShift Service Mesh and 3scale API Management Integration</span>
+      <ul class="versions">
+        <li class="version is-current">
+          <a href="introduction.html">4</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="introduction.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="introduction.html">OpenShift Service Mesh and 3scale API Management Integration</a></li>
+    <li><a href="21-path2.html">Path2 - Authentication Using OIDC</a></li>
+    <li><a href="24-enable-api-mgmt-bookinfo.html">Enable API Management for bookinfo - OIDC scenario</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="https://github.com/rpscodes/OpenShift-Service-Mesh-and-3scale-API-Management-Integration/edit/master/documentation/modules/ROOT/pages/24-enable-api-mgmt-bookinfo.adoc">Edit this Page</a></div>
+  </div>
+  <div class="content">
+<article class="doc">
+<h1 class="page">Enable API Management for bookinfo - OIDC scenario</h1>
+<div class="sect1">
+<h2 id="overview"><a class="anchor" href="#overview"></a>Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this section we shall enable the API management for bookinfo application using the 3scale WASM module</p>
+</div>
+<div class="sect2">
+<h3 id="service-entry"><a class="anchor" href="#service-entry"></a>Create Service Entry</h3>
+<div class="paragraph">
+<p>If you haven&#8217;t created Service Entries as apart of the earlier configuration follow the below instructions. Skip to the next <a href="#request-authentication">request authentication section</a> if you have already done this in part 1.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Custom Resource Definition file for the System Service Entry with name <code>ServiceEntry_system-entry.yaml</code> using vim or any other editor on the CLI. Copy paste the below yaml into the file and save it.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+ name: system-entry
+spec:
+ hosts:
+   - system-provider.3scale.svc.cluster.local
+ location: MESH_EXTERNAL
+ ports:
+   - name: http
+     number: 3000
+     protocol: HTTP
+ resolution: DNS</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a Custom Resource Definition file for the Backend Service Entry with name <code>ServiceEntry_backend-entry.yaml</code> using vim or any other editor on the CLI. Copy paste the below yaml into the file and save it.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+ name: backend-entry
+spec:
+ hosts:
+   - backend-listener.3scale.svc.cluster.local
+ location: MESH_EXTERNAL
+ ports:
+   - name: http
+     number: 3000
+     protocol: HTTP
+ resolution: DNS</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Apply the CRDs to your cluster using the below command</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f ServiceEntry_system-entry.yaml -f ServiceEntry_backend-entry.yaml -n bookinfo</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="request-authentication"><a class="anchor" href="#request-authentication"></a>Create Request Authentication</h3>
+<div class="paragraph">
+<p>Request authentication when applied to OSSM will validate the JWT token and store the contents in an internal metadata object which will be used by the 3scale WASM module to validate against 3scale.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Get the keycloak URL by pasting the below command on the command line where you are logged into the OpenShift Cluster</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc get route keycloak -o jsonpath="{.spec.host}{.spec.path}" -n keycloak</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a Request Authentication Custom Resource Definition file with name <code>RequestAuthentication_bookinfo-oidc.yaml</code> using vim or any other editor on the CLI. Copy paste the below yaml into the file and save it.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: bookinfo-oidc
+  namespace: bookinfo
+spec:
+  selector:
+    matchLabels:
+      app: productpage
+  jwtRules:
+  - issuer: &gt;-
+      <a href="https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale" class="bare">https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale</a>
+    jwksUri: &gt;-
+      <a href="https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/certs" class="bare">https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/certs</a></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Apply the CRD to your cluster using the below command</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f RequestAuthentication_bookinfo-oidc.yaml -n bookinfo</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="service-mesh-extension"><a class="anchor" href="#service-mesh-extension"></a>Create Service Mesh Extension</h3>
+<div class="paragraph">
+<p>The ServiceMeshExtension custom resource spec provides the configuration that the Proxy-WASM module reads from. The spec is embedded in the host and read by the Proxy-WASM module. Follow the below steps to configure the  ServiceMeshExtension</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If you haven&#8217;t already noted down the 'Admin Access Token' from 3scale Secret from earlier labs please follow these steps.   Retrieve the <strong>Admin_Access_token</strong> using the Console UI. Select 3scale project and Navigate to Developer &gt; Secrets and search for <strong>system-seed</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/seed-nav.png" alt="seed nav">
+</div>
+</div>
+</li>
+<li>
+<p>From the <strong>system-seed</strong> secret just copy and note down the the <strong>Admin_Access_Token</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/admin-cred.png" alt="admin cred">
+</div>
+</div>
+</li>
+<li>
+<p>The service token wil enable the permission for service mesh to be able to access a particular 3scale product. . The service token wil enable the permission for service mesh to be able to access a particular 3scale product. From the 3scale admin-portal navigate to  Account Settings &gt; Personal &gt; Tokens and Copy the Service Token of the product we created earlier</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/service-token-ui-oidc.png" alt="service token ui oidc">
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Alternatively you can use 3scale <strong>admin access token</strong> along with the 3scale <strong>product ID</strong> from the 3scale product configuration earlier and run the following command with values replaced to obtain the Service token. :</p>
+</div>
+<div class="paragraph">
+<p>+</p>
+</div>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl <a href="https://3scale-admin.%CLUSTER_WILDCARD_URL%/admin/api/services/{product" class="bare">https://3scale-admin.%CLUSTER_WILDCARD_URL%/admin/api/services/{product</a> id}/proxy/configs/production/latest.json?access_token={access token} | jq '.proxy_config.content.backend_authentication_value'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Your final command after replacing the values should look something like this</p>
+</div>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-example hljs" data-lang="example">curl <a href="https://3scale-admin.apps.cluster-pmjd8.pmjd8.sandbox783.opentlc.com/admin/api/services/4/proxy/configs/production/latest.json?access_token=OjcCkLtcZKopD1K9" class="bare">https://3scale-admin.apps.cluster-pmjd8.pmjd8.sandbox783.opentlc.com/admin/api/services/4/proxy/configs/production/latest.json?access_token=OjcCkLtcZKopD1K9</a> | jq '.proxy_config.content.backend_authentication_value'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Copy and note down the Service Access Token obtained</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Create a Custom Resource Definition file for the Service Mesh Extension with name <code>ServiceMeshExtension_bookinfo-oidc.yaml</code> using vim or any other editor on the CLI. Copy paste the below yaml into the file and replace the access token, service token, product id values and shown in the image below and save it.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+ name: bookinfo-oidc
+ namespace: bookinfo
+spec:
+ image: 'registry.redhat.io/openshift-service-mesh/3scale-auth-wasm-rhel8:0.0.1'
+ phase: PostAuthZ
+ priority: 100
+ workloadSelector:
+   labels:
+     app: productpage
+ config:
+   api: v1
+   system:
+     name: system
+     token: &lt;replace with 3scale admin access token&gt;
+     upstream:
+       name: &gt;-
+         outbound|3000||system-provider.3scale.svc.cluster.local
+       timeout: 5000
+       url: 'http://system-provider.3scale.svc.cluster.local'
+   backend:
+     extensions:
+       - no_body
+     name: backend
+     upstream:
+       name: &gt;-
+         outbound|3000||backend-listener.3scale.svc.cluster.local
+       timeout: 5000
+       url: 'http://backend-listener.3scale.svc.cluster.local'
+   services:
+    - id: '4'
+      token: &lt;replace with 3scale product service token&gt;
+      authorities:
+        - '*'
+      credentials:
+        app_id:
+          - filter:
+              path:
+                - envoy.filters.http.jwt_authn
+                - "0"
+              keys:
+                - azp
+              ops:
+                - take:
+                    head: 1
+      mapping_rules:
+        - method: GET
+          pattern: /
+          usages:
+            - delta: 1
+              name: hits</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/sme-oidc.png" alt="sme oidc">
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>3scale <code>app_id</code> for OIDC matches the OAuth&#8217;s <code>client_id</code> typically found in the <code>azp</code> field of the <code>JWT</code> token.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Please delete the ServiceMeshExtension if created before else ignore the step</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc delete sme bookinfo -n bookinfo</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Now Apply the newly created CRD to your cluster using the below command</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">oc apply -f ServiceMeshExtension_bookinfo-oidc.yaml -n bookinfo</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="application-authorise"><a class="anchor" href="#application-authorise"></a>Authorize an application to consume the API managed</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Login to 3scale and navigate to Products &gt; wasm-oidc-demo &gt; Applications &gt; Listing and Click <strong>Create Application</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/oidc-app.png" alt="oidc app">
+</div>
+</div>
+</li>
+<li>
+<p>Choose the default Developer Account, wasm-oidc-basic as Application Plan. Give any name and description to the application. Click on <strong>Create Application</strong></p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/oidc-app-details.png" alt="oidc app details">
+</div>
+</div>
+</li>
+<li>
+<p>You should now have an Client ID and Client Secret. This is needed to test Client Credentials and Authorization Code flows.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/oidc_cred.png" alt="oidc cred">
+</div>
+</div>
+</li>
+<li>
+<p>This is required to test Authorization Code flow. In the current page where application details are shown, under API Credentials section click Edit and apply(based on the version of the postman) either <a href="https://oauth.pstmn.io/v1/callback" class="bare">https://oauth.pstmn.io/v1/callback</a> OR <a href="https://www.getpostman.com/oauth2/callback" class="bare">https://www.getpostman.com/oauth2/callback</a> to the Redirect URL</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/redirect-oidc.gif" alt="redirect oidc">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="verification"><a class="anchor" href="#verification"></a>Verifying the policy enforcement</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>You can now verify the policy enforcement by first calling the endpoint without credentials and then later using the api key.</p>
+</li>
+<li>
+<p>Open a browser window and navigate to:</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-weblink hljs" data-lang="weblink"><a href="https://reqbin.com/curl" class="bare">https://reqbin.com/curl</a></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Copy and paste the below command.</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -v <a href="http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products" class="bare">http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products</a></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>You should see 403 status.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/403-oidc.png" alt="403 oidc">
+</div>
+</div>
+</li>
+<li>
+<p>Access with JWT token using Client Credential flow using the Client ID, Client Secret  Replace the <strong>Client ID</strong> and <strong>Client Secret</strong> in the commands below:</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export SSO_CLIENT_ID=&lt;Client ID&gt;
+export SSO_CLIENT_SECRET=&lt;Client Secret&gt;
+export SSO_URL=keycloak-keycloak.%CLUSTER_WILDCARD_URL%
+export TKN=$(curl -k -X POST \
+ -H "Content-Type: application/x-www-form-urlencoded" \
+ -d "grant_type=client_credentials&amp;client_id=$SSO_CLIENT_ID&amp;client_secret=$SSO_CLIENT_SECRET" \
+ <a href="https://$SSO_URL/auth/realms/threescale/protocol/openid-connect/token" class="bare">https://$SSO_URL/auth/realms/threescale/protocol/openid-connect/token</a> \
+| sed 's/.*access_token":"//g' | sed 's/".*//g')
+
+curl -v -H "Accept: application/json" -H "Authorization: Bearer $TKN" <a href="http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products" class="bare">http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products</a></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><em>You should see an HTTP 200 response.</em></p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verify_the_policy_enforcement_for_authorization_code_flow"><a class="anchor" href="#_verify_the_policy_enforcement_for_authorization_code_flow"></a>Verify the policy enforcement for Authorization Code flow</h3>
+<div class="paragraph">
+<p>Postman will be used to test this flow as it has to open the browser to capture the user credentials. So, please install postman if you do not have it</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a new GET request from Postman using the below URL (Do not hit send yet)</p>
+<div class="listingblock lines_7 console-input">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-api endpoint hljs" data-lang="api endpoint"><a href="http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products" class="bare">http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products</a></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Click on Authorization and select OAUth 2.0 from the Type dropdown</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/postman-oauth.png" alt="postman oauth">
+</div>
+</div>
+</li>
+<li>
+<p>Make sure you choose and fill in the correct values as shown below.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Access Token: Available Tokens</p>
+</li>
+<li>
+<p>Header Prefix: Bearer</p>
+</li>
+<li>
+<p>Grant Type: Authorization Code</p>
+</li>
+<li>
+<p>Callback URL: Check the Authorize using browser checkbox</p>
+</li>
+<li>
+<p>Auth URL: <a href="https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/auth" class="bare">https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/auth</a></p>
+</li>
+<li>
+<p>Access Token URL: <a href="https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/auth" class="bare">https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/auth</a></p>
+</li>
+<li>
+<p>Client ID: Client Id obtained from 3scale</p>
+</li>
+<li>
+<p>Client Secret: Client Secret obtained from 3scale</p>
+</li>
+<li>
+<p>Client Authentication: Send as Basic Auth Header</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>After choosing and entering the right values go ahead and hit the Get New Access Token button.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/get-token-psman.png" alt="get token psman">
+</div>
+</div>
+</li>
+<li>
+<p>The browser should open a login window asking for username and password. Go ahead and enter user1 for the username and openshift for the password</p>
+</li>
+<li>
+<p>Click on Open Postman</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/open-psman.png" alt="open psman">
+</div>
+</div>
+</li>
+<li>
+<p>Wait for the authentication to complete and token to appear. Click on Use Token</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/use_token.png" alt="use token">
+</div>
+</div>
+</li>
+<li>
+<p>The token is now populated in the Access Token Field. Now go ahead a hit send</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/send_btn.png" alt="send btn">
+</div>
+</div>
+</li>
+<li>
+<p>You should see a HTTP 200 with response from the API showing the title, ID and Summary of the book.</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/http-200.png" alt="http 200">
+</div>
+</div>
+</li>
+<li>
+<p>If you make more than 8 calls per minute (recollect the limit we set in our application plans) you should see a 403 status. The count gets refreshed every minute</p>
+<div class="imageblock">
+<div class="content">
+<img src="_images/403-psman.png" alt="403 psman">
+</div>
+</div>
+</li>
+<li>
+<p>In case you want to verify the calls on Kiali and Jaeger you can send multiple calls via Postman and check the paths and traces on the Kiali and Jaeger interfaces as illustrated in earlier labs.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="23-configuring-3scale.html" class="query-params-link">Configuring 3Scale Product for OIDC</a></span>
+</nav>
+</article>
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="rhd-logo" href="https://developers.redhat.com" target="_blank"></div>
+</footer>
+<script src="../../_/js/vendor/clipboard.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
