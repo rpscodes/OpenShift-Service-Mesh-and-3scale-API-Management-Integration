@@ -8,9 +8,7 @@ site:
 
 content:
   sources:
-    - url: git@github.com:redhat-scholars/openshift-starter-guides.git
-      tags: []
-      branches: [ocp-4.7, ocp-4.8, ocp-4.9]
+    - url: ./
       start_path: documentation
 
 asciidoc:
