@@ -1,0 +1,14 @@
+= Part 1
+include::_attributes.adoc[]
+
+[#overview]
+== Authentication Using API Key
+In the part1 of this demo we shall use API_Key as a method of authentication. Before you proceed please type your *OpenShift Cluster Wildcard DNS* in the box above. You can pick it up from the URL of your Console UI.
++
+image:wildcard-domain.png[wildcard domain]
+
+The above step is the most important for this lab. The *OpenShift Cluster Wildcard DNS* should ideally look something like this.  `apps.cluster-pmjd8.pmjd8.sandbox783.opentlc.com` . 
+
+*Warning:* The Cluster numbers for this lab are unique for each user so please do not copy and paste the above example. 
+
+Please proceed to the next section to get started.

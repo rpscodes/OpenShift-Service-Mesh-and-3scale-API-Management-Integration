@@ -1,0 +1,14 @@
+= Part 2
+include::_attributes.adoc[]
+
+[#overview]
+== Authentication Using API Key
+In the part2 of this demo we shall use Open ID Connect (OIDC) as a method of authentication instead of the API key. We shall leverage Red Hat SSO in this path. 
+
+[#prereq]
+== Prerequisites
+. Download Postman
+. Please complete Part 1 before trying this. 
+
+If both the above steps are done proceed to the step by step guide here: 
+xref:22-sso-setup.adoc[Provisioning Red Hat SSO]

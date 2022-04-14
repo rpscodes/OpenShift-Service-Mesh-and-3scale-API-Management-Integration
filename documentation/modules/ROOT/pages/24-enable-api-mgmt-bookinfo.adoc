@@ -1,0 +1,358 @@
+= Enable API Management for bookinfo - OIDC scenario
+include::_attributes.adoc[]
+
+[#overview]
+== Overview
+In this section we shall enable the API management for bookinfo application using the 3scale WASM module
+
+[#service-entry]
+=== Create Service Entry
+If you haven't created Service Entries as apart of the earlier configuration follow the below instructions. Skip to the next xref:24-enable-api-mgmt-bookinfo.adoc#request-authentication[request authentication section] if you have already done this in part 1. 
+
+. Create a Custom Resource Definition file for the System Service Entry with name `ServiceEntry_system-entry.yaml` using vim or any other editor on the CLI. Copy paste the below yaml into the file and save it. 
++
+[.lines_7]
+[.console-input]
+[source, yaml,subs="+macros,+attributes"]
+----
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+ name: system-entry
+spec:
+ hosts:
+   - system-provider.3scale.svc.cluster.local
+ location: MESH_EXTERNAL
+ ports:
+   - name: http
+     number: 3000
+     protocol: HTTP
+ resolution: DNS
+----
+
+. Create a Custom Resource Definition file for the Backend Service Entry with name `ServiceEntry_backend-entry.yaml` using vim or any other editor on the CLI. Copy paste the below yaml into the file and save it. 
++
+[.lines_7]
+[.console-input]
+[source, yaml,subs="+macros,+attributes"]
+----
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+ name: backend-entry
+spec:
+ hosts:
+   - backend-listener.3scale.svc.cluster.local
+ location: MESH_EXTERNAL
+ ports:
+   - name: http
+     number: 3000
+     protocol: HTTP
+ resolution: DNS
+----
+
+. Apply the CRDs to your cluster using the below command
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+oc apply -f ServiceEntry_system-entry.yaml -f ServiceEntry_backend-entry.yaml -n bookinfo
+----
+
+
+[#request-authentication]
+=== Create Request Authentication
+Request authentication when applied to OSSM will validate the JWT token and store the contents in an internal metadata object which will be used by the 3scale WASM module to validate against 3scale.
+
+. Get the keycloak URL by pasting the below command on the command line where you are logged into the OpenShift Cluster
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+oc get route keycloak -o jsonpath="{.spec.host}{.spec.path}" -n keycloak
+----
+
+. Create a Request Authentication Custom Resource Definition file with name `RequestAuthentication_bookinfo-oidc.yaml` using vim or any other editor on the CLI. Copy paste the below yaml into the file and save it. 
++
+[.lines_7]
+[.console-input]
+[source, yaml,subs="+macros,+attributes"]
+----
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: bookinfo-oidc
+  namespace: bookinfo
+spec:
+  selector:
+    matchLabels:
+      app: productpage
+  jwtRules:
+  - issuer: >-
+      https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale
+    jwksUri: >-
+      https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/certs
+----
+
+. Apply the CRD to your cluster using the below command
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+oc apply -f RequestAuthentication_bookinfo-oidc.yaml -n bookinfo
+----
+
+[#service-mesh-extension]
+=== Create Service Mesh Extension
+The ServiceMeshExtension custom resource spec provides the configuration that the Proxy-WASM module reads from. The spec is embedded in the host and read by the Proxy-WASM module. Follow the below steps to configure the  ServiceMeshExtension
+
+. If you haven't already noted down the 'Admin Access Token' from 3scale Secret from earlier labs please follow these steps.   Retrieve the *Admin_Access_token* using the Console UI. Select 3scale project and Navigate to Developer > Secrets and search for *system-seed*
++
+image::seed-nav.png[]
+
+. From the *system-seed* secret just copy and note down the the *Admin_Access_Token* 
++
+image::admin-cred.png[]
+
+. The service token wil enable the permission for service mesh to be able to access a particular 3scale product. . The service token wil enable the permission for service mesh to be able to access a particular 3scale product. From the 3scale admin-portal navigate to  Account Settings > Personal > Tokens and Copy the Service Token of the product we created earlier
++
+image::service-token-ui-oidc.png[]
++
+[NOTE]
+===============================
+Alternatively you can use 3scale *admin access token* along with the 3scale *product ID* from the 3scale product configuration earlier and run the following command with values replaced to obtain the Service token. :
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+curl https://3scale-admin.%CLUSTER_WILDCARD_URL%/admin/api/services/{product id}/proxy/configs/production/latest.json?access_token={access token} | jq '.proxy_config.content.backend_authentication_value'
+----
+
+Your final command after replacing the values should look something like this
+
+[.lines_7]
+[.console-input]
+[source, example,subs="+macros,+attributes"]
+----
+curl https://3scale-admin.apps.cluster-pmjd8.pmjd8.sandbox783.opentlc.com/admin/api/services/4/proxy/configs/production/latest.json?access_token=OjcCkLtcZKopD1K9 | jq '.proxy_config.content.backend_authentication_value'
+----
+
+Copy and note down the Service Access Token obtained
+===============================
+
+. Create a Custom Resource Definition file for the Service Mesh Extension with name `ServiceMeshExtension_bookinfo-oidc.yaml` using vim or any other editor on the CLI. Copy paste the below yaml into the file and replace the access token, service token, product id values and shown in the image below and save it. 
++
+[.lines_7]
+[.console-input]
+[source, yaml,subs="+macros,+attributes"]
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshExtension
+metadata:
+ name: bookinfo-oidc
+ namespace: bookinfo
+spec:
+ image: 'registry.redhat.io/openshift-service-mesh/3scale-auth-wasm-rhel8:0.0.1'
+ phase: PostAuthZ
+ priority: 100
+ workloadSelector:
+   labels:
+     app: productpage
+ config:
+   api: v1
+   system:
+     name: system
+     token: <replace with 3scale admin access token>
+     upstream:
+       name: >-
+         outbound|3000||system-provider.3scale.svc.cluster.local
+       timeout: 5000
+       url: 'http://system-provider.3scale.svc.cluster.local'
+   backend:
+     extensions:
+       - no_body
+     name: backend
+     upstream:
+       name: >-
+         outbound|3000||backend-listener.3scale.svc.cluster.local
+       timeout: 5000
+       url: 'http://backend-listener.3scale.svc.cluster.local'
+   services:
+    - id: '4'
+      token: <replace with 3scale product service token>
+      authorities:
+        - '*'
+      credentials:
+        app_id:
+          - filter:
+              path:
+                - envoy.filters.http.jwt_authn
+                - "0"
+              keys:
+                - azp
+              ops:
+                - take:
+                    head: 1
+      mapping_rules:
+        - method: GET
+          pattern: /
+          usages:
+            - delta: 1
+              name: hits
+ 
+----
++
+image::sme-oidc.png[]
++
+[NOTE]
+===============================
+3scale `app_id` for OIDC matches the OAuth's `client_id` typically found in the `azp` field of the `JWT` token. 
+===============================
+
+
+
+. Please delete the ServiceMeshExtension if created before else ignore the step
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+oc delete sme bookinfo -n bookinfo
+----
+
+. Now Apply the newly created CRD to your cluster using the below command
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+oc apply -f ServiceMeshExtension_bookinfo-oidc.yaml -n bookinfo
+----
+
+[#application-authorise]
+=== Authorize an application to consume the API managed
+. Login to 3scale and navigate to Products > wasm-oidc-demo > Applications > Listing and Click *Create Application*
++
+image::oidc-app.png[]
+
+. Choose the default Developer Account, wasm-oidc-basic as Application Plan. Give any name and description to the application. Click on *Create Application*
++
+image::oidc-app-details.png[]
+
+. You should now have an Client ID and Client Secret. This is needed to test Client Credentials and Authorization Code flows.
++
+image::oidc_cred.png[]
+
+. This is required to test Authorization Code flow. In the current page where application details are shown, under API Credentials section click Edit and apply(based on the version of the postman) either https://oauth.pstmn.io/v1/callback OR https://www.getpostman.com/oauth2/callback to the Redirect URL
++
+image::redirect-oidc.gif[]
+
+
+[#verification]
+=== Verifying the policy enforcement
+. You can now verify the policy enforcement by first calling the endpoint without credentials and then later using the api key.
+
+. Open a browser window and navigate to:
++
+[.lines_7]
+[.console-input]
+[source, weblink,subs="+macros,+attributes"]
+----
+https://reqbin.com/curl
+----
+
+. Copy and paste the below command. 
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+curl -v http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products
+----
+
+. You should see 403 status.
++
+image::403-oidc.png[]
+
+. Access with JWT token using Client Credential flow using the Client ID, Client Secret  Replace the *Client ID* and *Client Secret* in the commands below:
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+export SSO_CLIENT_ID=<Client ID>
+export SSO_CLIENT_SECRET=<Client Secret>
+export SSO_URL=keycloak-keycloak.%CLUSTER_WILDCARD_URL%
+export TKN=$(curl -k -X POST \
+ -H "Content-Type: application/x-www-form-urlencoded" \
+ -d "grant_type=client_credentials&client_id=$SSO_CLIENT_ID&client_secret=$SSO_CLIENT_SECRET" \
+ https://$SSO_URL/auth/realms/threescale/protocol/openid-connect/token \
+| sed 's/.*access_token":"//g' | sed 's/".*//g')
+
+curl -v -H "Accept: application/json" -H "Authorization: Bearer $TKN" http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products
+----
++
+_You should see an HTTP 200 response._
+
+[#verification of policy enforcement flow]
+=== Verify the policy enforcement for Authorization Code flow
+Postman will be used to test this flow as it has to open the browser to capture the user credentials. So, please install postman if you do not have it 
+
+. Create a new GET request from Postman using the below URL (Do not hit send yet)
++
+[.lines_7]
+[.console-input]
+[source, api endpoint,subs="+macros,+attributes"]
+----
+http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/api/v1/products
+----
+
+. Click on Authorization and select OAUth 2.0 from the Type dropdown
++
+image::postman-oauth.png[]
+
+. Make sure you choose and fill in the correct values as shown below.
+ - Access Token: Available Tokens
+ - Header Prefix: Bearer
+ - Grant Type: Authorization Code
+ - Callback URL: Check the Authorize using browser checkbox
+ - Auth URL: https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/auth
+ - Access Token URL: https://keycloak-keycloak.%CLUSTER_WILDCARD_URL%/auth/realms/threescale/protocol/openid-connect/auth
+ - Client ID: Client Id obtained from 3scale
+ - Client Secret: Client Secret obtained from 3scale
+ - Client Authentication: Send as Basic Auth Header
+
+. After choosing and entering the right values go ahead and hit the Get New Access Token button.
++
+image::get-token-psman.png[]
+
+. The browser should open a login window asking for username and password. Go ahead and enter user1 for the username and openshift for the password
+
+. Click on Open Postman
++
+image::open-psman.png[]
+
+
+. Wait for the authentication to complete and token to appear. Click on Use Token
++
+image::use_token.png[]
+
+. The token is now populated in the Access Token Field. Now go ahead a hit send
++
+image::send_btn.png[]
+
+. You should see a HTTP 200 with response from the API showing the title, ID and Summary of the book.
++
+image::http-200.png[]
+
+. If you make more than 8 calls per minute (recollect the limit we set in our application plans) you should see a 403 status. The count gets refreshed every minute
++
+image::403-psman.png[]
+
+. In case you want to verify the calls on Kiali and Jaeger you can send multiple calls via Postman and check the paths and traces on the Kiali and Jaeger interfaces as illustrated in earlier labs.  
+ 
+ 

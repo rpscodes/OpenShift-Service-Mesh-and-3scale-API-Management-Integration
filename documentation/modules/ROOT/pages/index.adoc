@@ -1,13 +1,19 @@
-= Welcome to OpenShift Starter Guides
+= Welcome to Template Tutorial
+:page-layout: home
 :!sectids:
-ifndef::lab[]
-:lab-name: Java
-endif::[]
 
-== Developing {lab-name} Applications on OpenShift - Starter Lab
+[.text-center.strong]
+== Publish Services to Kubernetes
 
-link:https://www.redhat.com/en/topics/containers/whats-a-linux-container-vb[Containers,window='_blank'] are a standardized way to package apps with all of their dependencies to simplify deployment and speed delivery. Unlike virtual machines, containers do not bundle to the operating system. Only the application code, run time, libraries, and settings are packaged inside of containers. Thus, containers are more lightweight, portable, and efficient as compared to virtual machines.
+A Kubernetes tutorial to show how you can deploy a Java service to a Kubernetes cluster as it was a child game.
 
-For developers looking to kickstart their projects, link:https://openshift.com/[OpenShift,window='_blank'] enables efficient application development through streamlined workflows and validated integrations.
+[.tiles.browse]
+== Browse modules
+[.tile]
+.xref:01-setup.adoc[Get Started]
+* xref:01-setup.adoc#minikube[Minikube]
 
-This Lab is accompanied by the slide deck available at link:https://dn.dev/openshift-workshop[dn.dev/openshift-workshop,window='_blank']
+[.tile]
+.xref:02-deploy.adoc[Deploying]
+* xref:02-deploy.adoc#package[Package the Application]
+* xref:02-deploy.adoc#deploy[Deploy the Application]

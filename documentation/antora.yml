@@ -1,7 +1,7 @@
 name: rhs-openshift-starter-guides
-title: OpenShift Starter Guides
-version: 4.9
+title: OpenShift Service Mesh and 3scale API Management Integration
+version: 4
 nav:
   - modules/ROOT/nav.adoc
 
-start_page: ROOT:index.adoc
+start_page: ROOT:introduction.adoc
