@@ -17,7 +17,7 @@
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () { 
       const urlParams = new URLSearchParams(window.location.search);
-      const clusterName = urlParams.get('CLUSTER_SUBDOMAIN');
+      const clusterName = urlParams.get('CLUSTER_WILDCARD_URL');
       const projectName = urlParams.get('PROJECT');
       if (clusterName) {
         showCluster( clusterName );
@@ -59,7 +59,7 @@
       elClusterInput = document.getElementById('clusterfield');
       elProjectInput = document.getElementById('projectfield2');
 
-      window.location.search = ('&CLUSTER_SUBDOMAIN=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
     }
 
     function showProject( projectName ) {
@@ -77,7 +77,7 @@
     function gowithproject() {
       elProjectInput = document.getElementById('projectfield');
       elClusterInput = document.getElementById('clusterfield2');
-      window.location.search = ('&CLUSTER_SUBDOMAIN=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
     }
 
   </script>
@@ -99,7 +99,7 @@
               class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
 
           <form action="javascript:void(0);" onsubmit="gowithcluster();">
-            <input size="40" id="clusterfield" type="text" placeholder="Enter Cluster Subdomain">
+            <input size="40" id="clusterfield" type="text" placeholder="Enter OpenShift Cluster Wildcard DNS">
             <input type="hidden" id="projectfield2" name="projectfield2" value="">
           </form>
         </div>
@@ -550,7 +550,6 @@
 <main class="article">
 <div class="toolbar" role="navigation">
 <button class="nav-toggle"></button>
-  <a href="index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="index.html">OpenShift Starter Guides</a></li>
