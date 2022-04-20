@@ -59,7 +59,9 @@
       elClusterInput = document.getElementById('clusterfield');
       elProjectInput = document.getElementById('projectfield2');
 
-      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+      // Remove Project from URL query parameters
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value);
+      // window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
     }
 
     function showProject( projectName ) {
@@ -111,11 +113,12 @@
         </div>
 
          <div class="navbar-item" id="navbar-form-project-empty">
-          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
-              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+          <!-- Removing the Project text field and exclamation triangle -->
+          <!-- <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span> -->
 
           <form action="javascript:void(0);" onsubmit="gowithproject();">
-            <input size="40" id="projectfield" type="text" placeholder="Enter Project Name">
+            <!-- <input size="40" id="projectfield" type="text" placeholder="Enter Project Name"> -->
             <input type="hidden" id="clusterfield2" name="clusterfield2" value="">
           </form>
         </div>
@@ -335,19 +338,11 @@ spec:
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Alternatively, you can also use 3scale <strong>admin access token</strong> along with the 3scale <strong>product ID</strong> from the 3scale product configuration earlier and run the following command with values replaced to obtain the Service token:</p>
+<p>Alternatively, you can also use 3scale <strong>admin access token</strong> along with the 3scale <strong>product ID</strong> from the 3scale product configuration earlier and run the following command with values <strong>replaced</strong> to obtain the Service token:</p>
 </div>
 <div class="listingblock lines_7 console-input">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl <a href="https://3scale-admin.%CLUSTER_WILDCARD_URL%/admin/api/services/{product" class="bare">https://3scale-admin.%CLUSTER_WILDCARD_URL%/admin/api/services/{product</a> id}/proxy/configs/production/latest.json?access_token={access token} | jq '.proxy_config.content.backend_authentication_value'</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Your final command after replacing the values should look something like this</p>
-</div>
-<div class="listingblock lines_7 console-input">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-example hljs" data-lang="example">curl <a href="https://3scale-admin.apps.cluster-pmjd8.pmjd8.sandbox783.opentlc.com/admin/api/services/3/proxy/configs/production/latest.json?access_token=OjcCkLtcZKopD1K9" class="bare">https://3scale-admin.apps.cluster-pmjd8.pmjd8.sandbox783.opentlc.com/admin/api/services/3/proxy/configs/production/latest.json?access_token=OjcCkLtcZKopD1K9</a> | jq '.proxy_config.content.backend_authentication_value'</code></pre>
 </div>
 </div>
 <div class="paragraph">

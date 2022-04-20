@@ -57,7 +57,9 @@
       elClusterInput = document.getElementById('clusterfield');
       elProjectInput = document.getElementById('projectfield2');
 
-      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
+      // Remove Project from URL query parameters
+      window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value);
+      // window.location.search = ('&CLUSTER_WILDCARD_URL=' + elClusterInput.value + '&PROJECT=' + elProjectInput.value);
     }
 
     function showProject( projectName ) {
@@ -109,11 +111,12 @@
         </div>
 
          <div class="navbar-item" id="navbar-form-project-empty">
-          <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
-              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+          <!-- Removing the Project text field and exclamation triangle -->
+          <!-- <span class="navbar-text" style="margin-left: 1rem; margin-right: 1rem;">&nbsp;<i style="color: orange;"
+              class="fa fa-exclamation-triangle" aria-hidden="true"></i></span> -->
 
           <form action="javascript:void(0);" onsubmit="gowithproject();">
-            <input size="40" id="projectfield" type="text" placeholder="Enter Project Name">
+            <!-- <input size="40" id="projectfield" type="text" placeholder="Enter Project Name"> -->
             <input type="hidden" id="clusterfield2" name="clusterfield2" value="">
           </form>
         </div>
