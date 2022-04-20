@@ -80,22 +80,13 @@ image::service-token-ui.png[]
 +
 [NOTE]
 ===============================
-Alternatively, you can also use 3scale *admin access token* along with the 3scale *product ID* from the 3scale product configuration earlier and run the following command with values replaced to obtain the Service token:
+Alternatively, you can also use 3scale *admin access token* along with the 3scale *product ID* from the 3scale product configuration earlier and run the following command with values *replaced* to obtain the Service token:
 
 [.lines_7]
 [.console-input]
 [source, bash,subs="+macros,+attributes"]
 ----
 curl https://3scale-admin.%CLUSTER_WILDCARD_URL%/admin/api/services/{product id}/proxy/configs/production/latest.json?access_token={access token} | jq '.proxy_config.content.backend_authentication_value'
-----
-
-Your final command after replacing the values should look something like this
-
-[.lines_7]
-[.console-input]
-[source, example,subs="+macros,+attributes"]
-----
-curl https://3scale-admin.apps.cluster-pmjd8.pmjd8.sandbox783.opentlc.com/admin/api/services/3/proxy/configs/production/latest.json?access_token=OjcCkLtcZKopD1K9 | jq '.proxy_config.content.backend_authentication_value'
 ----
 
 Copy and note down the Service Access Token obtained

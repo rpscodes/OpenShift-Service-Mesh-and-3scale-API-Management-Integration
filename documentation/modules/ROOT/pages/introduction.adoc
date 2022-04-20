@@ -15,7 +15,7 @@ This link:https://www.redhat.com/rhdc/managed-files/cl-service-mesh-and-api-mana
 
 [#installation]
 == Installation Steps
-You are provided with an *OpenShift Container Platform 4.9* environment and will perform all the below actions as a part of this lab
+You are provided with an *OpenShift Container Platform 4.9* environment and will perform all the below actions as a part of this lab (For internal Red Hat folks please order an OCP 4.9 cluster from RHPDS)
 
 . Installing 3scale
 . Installing OpenShift Service Mesh
