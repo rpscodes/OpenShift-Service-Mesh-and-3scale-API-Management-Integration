@@ -135,7 +135,7 @@ curl https://3scale-admin.%CLUSTER_WILDCARD_URL%/admin/api/services/{product id}
 Copy and note down the Service Access Token obtained
 ===============================
 
-. Create a Custom Resource Definition file for the Service Mesh Extension with name `ServiceMeshExtension_bookinfo-oidc.yaml` using vim or any other editor on the CLI. Copy paste the below yaml into the file and replace the access token, service token, product id values and shown in the image below and save it. 
+. Create a Custom Resource Definition file for the Service Mesh Extension with name `ServiceMeshExtension_bookinfo-oidc.yaml` using vim or any other editor on the CLI. Copy paste the below yaml into the file and replace the *access token*, *service token*, *product id* values as shown in the image below and save it. 
 +
 [.lines_7]
 [.console-input]
