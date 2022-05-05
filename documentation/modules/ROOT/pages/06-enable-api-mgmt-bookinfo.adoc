@@ -9,7 +9,7 @@ In this section we shall enable the API management for bookinfo application usin
 === Create Service Entry
 To have the 3scale Web Assembly module authorize requests against 3scale, the module must have access to 3scale services. You can accomplish this within Red Hat OpenShift Service Mesh and Istio by applying an external ServiceEntry object.
 
-The custom resources set up the service entries for access from within Service Mesh to 3scale Hosted (SaaS) for the backend and system components of the Service Management API and the Account Management API. The Service Management API receives queries for the authorization status of each request. The Account Management API provides API management configuration settings for your services.
+The custom resources set up the service entries for access from within Service Mesh to 3scale for the backend and system components of the Service Management API and the Account Management API. The Service Management API receives queries for the authorization status of each request. The Account Management API provides API management configuration settings for your services.
 
 . Create a Custom Resource Definition file for the System Service Entry with name `ServiceEntry_system-entry.yaml` using vim or any other editor on the CLI. Copy paste the below yaml into the file and save it. 
 +
