@@ -74,7 +74,7 @@ image::seed-nav.png[]
 +
 image::admin-cred.png[]
 
-. The service token wil enable the permission for service mesh to be able to access a particular 3scale product. From the 3scale admin-portal navigate to  Account Settings > Personal > Tokens and Copy the Service Token of the product we created earlier
+. The service token will enable the permission for service mesh to be able to access a particular 3scale product. From the 3scale admin-portal navigate to  Account Settings > Personal > Tokens and Copy the Service Token of the product we created earlier
 +
 image::service-token-ui.png[]
 +
