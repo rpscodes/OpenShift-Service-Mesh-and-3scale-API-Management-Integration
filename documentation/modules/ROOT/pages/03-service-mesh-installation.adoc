@@ -3,7 +3,7 @@ include::_attributes.adoc[]
 
 [#controlplane]
 == Service Mesh Control Plane Overview
-We will be installing Elasticsearch, Jaeger, and Kiali for tracing and monitoring purposes. These are not mandatory for a general service mesh installation but are helpful in tracing the route of the calls, monitoring the mesh etc.  
+We will be installing Elasticsearch, Jaeger, and Kiali for tracing and monitoring purposes.   
 
 [#elastic]
 === Elastic Search Operator Installation
