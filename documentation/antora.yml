@@ -1,7 +1,7 @@
-name: rhs-openshift-starter-guides
-title: OpenShift Service Mesh and 3scale API Management Integration
+name: comprehensive-service-architecture
+title: Comprehensive Service Architecture
 version: 4
 nav:
   - modules/ROOT/nav.adoc
 
-start_page: ROOT:introduction.adoc
+start_page: ROOT:index.adoc
