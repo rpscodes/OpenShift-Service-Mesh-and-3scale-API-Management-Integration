@@ -1,6 +1,6 @@
 name: comprehensive-service-architecture
 title: Comprehensive Service Architecture
-version: 4
+version: master
 nav:
   - modules/ROOT/nav.adoc
 
