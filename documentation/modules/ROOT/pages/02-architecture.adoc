@@ -172,6 +172,7 @@ image:architecture-step4.png[alt='Scenario 4']
 
 3scale API Management and OpenShift Service Mesh deliver the right capabilities for the right traffic at the right time - for both internal and external clients. 
 It allows
+
 *  standardise and secure connectivity with no changes to existing services. 
 * Easy onboarding of partners
 * Monitoring, observability
