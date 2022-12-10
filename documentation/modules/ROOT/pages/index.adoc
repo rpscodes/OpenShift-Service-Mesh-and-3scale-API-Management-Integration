@@ -1,4 +1,4 @@
-= Solution Patterns: A comprehensive service architecture API Management and Service Meh
+= Solution Pattern: A comprehensive service architecture API Management and Service Mesh
 :page-layout: home
 :sectnums:
 :sectlinks:

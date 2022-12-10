@@ -1,4 +1,4 @@
-= Solution Pattern: Name Template
+= Solution Pattern: A comprehensive service architecture API Management and Service Mesh
 :sectnums:
 :sectlinks:
 :doctype: book
