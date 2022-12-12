@@ -273,7 +273,7 @@ http://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%
 
 * Try to choose a city from the drop down to get the hotels, cars, flights information for that city. You will notice that the city drop down is not showing any values. Let's investigate on what's happening. 
 +
-image::empty-city-list.png[empty-city-list]
+image::empty-city-list-new.png[empty-city-list-new]
 
 * Navigate to the deployment of the app on you https://console-openshift-console.%CLUSTER_WILDCARD_URL%[OpenShift Console] and click on the *travels-demo-ui* deployment
 +
@@ -345,13 +345,13 @@ http://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%
 
 * Since we've provided the API key, we should now be able to select a city from the dropdown and get details of the hotels, flights, cars etc that are relevant to that city. 
 +
-image::red-app-works.gif[red-app-works]
+image::red-app-works-new.gif[red-app-works-new]
 
 * Two other similar partner apps http://travels-green-ui-green-portal.%CLUSTER_WILDCARD_URL%[Green App] and http://travels-blue-ui-blue-portal.%CLUSTER_WILDCARD_URL%[Blue App] have already been deployed 
 +
-image::green-app.png[green-app]
+image::green-app-new.png[green-app-new]
 +
-image::blue-app.png[blue-app]
+image::blue-app-new.png[blue-app-new]
 
 
 ==== Monitor and analyze the external API calls 
