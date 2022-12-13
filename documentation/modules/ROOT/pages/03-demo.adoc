@@ -103,9 +103,15 @@ ansible-playbook -i ${TARGET_HOST}, ./configs/ocp-workloads/ocp-workload.yml \
 Complete following instructions to ensure that this guide is configured correctly for your OpenShift cluster.
 ====
 
+* Login to the https://console-openshift-console.%CLUSTER_WILDCARD_URL%[Open Shift Console] as admin user
 
+* Click on the admin user name shown on the https://console-openshift-console.%CLUSTER_WILDCARD_URL%[Openshift console] and click on the *Copy Login Command* option.  
++
+image::copy-login.png[copy-login]
 
-
+* Copy the login command and paste it on the terminal where OpenShift CLI is installed
++
+image::login-command.png[login-command]
 
 * Type the below command on you *oc cli* to get the OpenShift ingress domain value and copy it: 
 +
@@ -145,7 +151,7 @@ image::kiali-visualization.png[kiali-visualization]
 +
 This is all possible because of these services are a part of the service mesh
 
-* Trace each microservice call and interaction using the distributed tracing capability of OpenShift Service Mesh. Login into the https://jaeger-istio-system.apps.cluster-24vln.24vln.sandbox1725.opentlc.com/[Jaeger UI] with OpenShift credentials. 
+* Trace each microservice call and interaction using the distributed tracing capability of OpenShift Service Mesh. Login into the https://jaeger-istio-system.%CLUSTER_WILDCARD_URL%[Jaeger UI] with OpenShift credentials. 
 +
 image::dist-tracing-nav.png[dist-tracing-nav]
 
