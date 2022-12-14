@@ -414,10 +414,12 @@ NOTE: 3scale provides a developer portal out of the box where API consumers can 
 This section portrayed how APIs can be shared, secured, monitored when exposed externally using 3scale API Management. All the external applications are calling the 3scale Apicast gateway which acts as a reverse proxy and only redirects authenticated calls to the backend to get a response. 
 
 
-=== Scenario 3 - Securing Internal API access - Inter Domain Traffic
+=== Scenario 4 - Securing Internal API access - Inter Domain Traffic
 More often than not huge enterprises have multiple business units or LOBs with varying goals and KPIs. In such scenarios when the internal LOBs want to share and reuse the APIs built by other LOBs, it is better to establish a formal relation to track the value that the APIs are provided internally. It is also important make sure the external LOBs are accessing our APIs securely and not abusing them. 
 
 The travels-portal and travel-agency are two such LOBs that are part of the Travelz company. The travel-agency LOB is the provider of the API and travel-portal LOB is the consumer. We are going to leverage the native Red Hat 3scale and Service Mesh Integration here to establish the formal relationship. In this ServiceMesh serves as the dataplane and 3scale serves as the control plane which eliminates the need to have an additional gateway and reduces latency due to the reduced number of hops. 
+
+image::architecture-step4.png[architecture-step4]
 
 The ServiceMeshExtension custom resource spec provides the configuration that the integration module reads from. The spec is embedded in the host and read by the module. Follow the below steps to configure the  ServiceMeshExtension. *This will setup the API management control plane for us.* 
 
