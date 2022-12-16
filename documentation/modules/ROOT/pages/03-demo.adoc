@@ -22,17 +22,39 @@ These are the steps to provision the demo
 === Prerequisites
 You will need the following prerequisites:
 
-* Access to an OpenShift environment, preferably with cluster-admin privileges.
+* Access to an OpenShift environment (preferably 4.10), with cluster-admin privileges. This pattern 
 * OpenShift CLI 
 * Ansible Installed on your local machine
 ** Follow this https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html[guide^] to install Ansible if you haven't already done so
-* Set up SSH connections so Ansible can connect to the managed nodes.
-** Add your public SSH key to the authorized_keys file on the remote system.
-*** You can follow this https://jacobtomlinson.dev/posts/2013/ssh-without-a-password-on-os-x-with-ssh-copy-id/[link^] to set up the keys and SSH connections on a Mac 
 
-** Test the SSH connection. After setting up the keys you should be able to SSH to the remote machine where OpenShift is installed without needing a password.
+=== Guide Setup 
+[IMPORTANT]
+====
+Complete following instructions to ensure that this instruction guide is configured correctly for your OpenShift cluster.
+====
 
-Test the SSH connections, for example:
+* Login to the Open Shift Console as admin user
+
+* Click on the admin user name shown on the Openshift console and click on the *Copy Login Command* option.  
++
+image::copy-login.png[copy-login]
+
+* Copy the login command and paste it on the terminal where OpenShift CLI is installed
++
+image::login-command.png[login-command]
+
+* Type the below command on you *oc cli* to get the OpenShift ingress domain value and copy it: 
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+---- 
+oc get ingresses.config/cluster -o jsonpath={.spec.domain}
+----
+
+* Enter in the text box provided in the instructions page and hit enter
++
+image::input-ingress-value.png[input-ingress-value]
 
 === Setting up the demo environment
 * Download this repo into your local machine (on any machine where you've installed ansible)
@@ -55,39 +77,13 @@ git clone https://github.com/redhat-servicemesh-apim-demo/3scale-OSSM-TravelDemo
 cd 3scale-OSSM-TravelDemo-Playbooks/ansible
 ----
 
-* Set the following environment variables. Copy paste the below on your terminal 
-+
-[.lines_7]
-[.console-input]
-[source, bash,subs="+macros,+attributes"]
-----
-TARGET_HOST="Replace with the ssh username of your remote machine"
-OCP_USERNAME="Replace with OpenShift Admin username"
-WORKLOAD="ocp4-workload-3scale-servicemesh-demo"
-----
-+
-Example:
-+
-[.lines_7]
-[.console-input]
-[source, bash,subs="+macros,+attributes"]
-----
-TARGET_HOST="lab-user@bastion.zvbw7.sandbox5.opentlc.com"
-OCP_USERNAME="kubeadmin"
-WORKLOAD="ocp4-workload-3scale-servicemesh-demo"
-----
-
 * Run the below playbook using the below command and wait until the playbook finishes running
 +
 [.lines_7]
 [.console-input]
 [source, bash,subs="+macros,+attributes"]
 ----
-ansible-playbook -i ${TARGET_HOST}, ./configs/ocp-workloads/ocp-workload.yml \
-                -e"ansible_ssh_private_key_file=~/.ssh/id_rsa" \
-                   -e"ocp_username=${OCP_USERNAME}" \
-                   -e"ocp_workload=${WORKLOAD}" \
-                   -e"ACTION=create"
+ansible-playbook playbooks/install.yml -e"ACTION=install" 
 ----
 
 === Walkthrough guide
@@ -97,34 +93,6 @@ ansible-playbook -i ${TARGET_HOST}, ./configs/ocp-workloads/ocp-workload.yml \
 ** 3Scale API Management
 ** Partner Booking Apps
 
-=== Guide Setup 
-[IMPORTANT]
-====
-Complete following instructions to ensure that this guide is configured correctly for your OpenShift cluster.
-====
-
-* Login to the https://console-openshift-console.%CLUSTER_WILDCARD_URL%[Open Shift Console] as admin user
-
-* Click on the admin user name shown on the https://console-openshift-console.%CLUSTER_WILDCARD_URL%[Openshift console] and click on the *Copy Login Command* option.  
-+
-image::copy-login.png[copy-login]
-
-* Copy the login command and paste it on the terminal where OpenShift CLI is installed
-+
-image::login-command.png[login-command]
-
-* Type the below command on you *oc cli* to get the OpenShift ingress domain value and copy it: 
-+
-[.lines_7]
-[.console-input]
-[source, bash,subs="+macros,+attributes"]
----- 
-oc get ingresses.config/cluster -o jsonpath={.spec.domain}
-----
-
-* Enter in the text box provided in the instructions page and hit enter
-+
-image::input-ingress-value.png[input-ingress-value]
 
 === Scenario 1 - Managing and Visualizing the microservices 
 Our Ansible script has already deployed the travelz application and configured Service Mesh to managed them. In the below steps we shall learn how ServiceMesh services, increase observability and tracing across these services. 
@@ -177,15 +145,7 @@ A lot of partner companies approached Travelz and requested them to open up the 
 
 Travelz wanted to build a new version (v2) for partners. They wanted all the partners calls to flow to v2 and the internal calls through v1. They decided to leverage the intelligent traffic routing capabilities of Service Mesh for this.
 
-* Click on the admin user name shown on the https://console-openshift-console.%CLUSTER_WILDCARD_URL%[Openshift console] and click on the *Copy Login Command* option.  
-+
-image::copy-login.png[copy-login]
-
-* Copy the login command and paste it on the terminal where OpenShift CLI is installed
-+
-image::login-command.png[login-command]
-
-* Deploy v2 version of the travel microservice using the below command and wait for a couple of minutes
+* Deploy v2 version of the travel microservice using the below command on your temrinal with *oc cli* and wait for a couple of minutes
 +
 [.lines_7]
 [.console-input]
@@ -308,6 +268,8 @@ https://3scale-admin.%CLUSTER_WILDCARD_URL%
 ----
 oc get secret -n 3scale system-seed -o json | jq -r .data.ADMIN_PASSWORD | base64 -d
 ---- 
++
+NOTE: Please install the https://stedolan.github.io/jq/download/[jq] package on your terminal if you already do not have it
 
 * Once you login to the 3scale admin portal, close the on boarding wizard to land directly on the dashboard. 
 +
@@ -603,3 +565,22 @@ image::back-nav.png[back-nav]
 * Notice that all the traffic is now *green* indicating that the traffic is flowing seamlessly across the services. The graph should look exactly like how we started the exercise but the only difference being that all the traffic flowing from internal portals is authenticated and monitored via 3scale.
 + 
 image::kiali-graph-nav.png[kiali-graph-nav]
+
+=== Uninstalling the demo environment
+* On your terminal, navigate to folder `3scale-OSSM-TravelDemo-Playbooks/ansible`
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+cd 3scale-OSSM-TravelDemo-Playbooks/ansible
+----
+
+* Run the below playbook using the below command and wait until the playbook finishes running
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+ansible-playbook playbooks/install.yml -e"ACTION=uninstall" 
+----
