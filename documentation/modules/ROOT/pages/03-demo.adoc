@@ -1,4 +1,4 @@
-= Solution Pattern: A comprehensive service architecture API Management and Service Mesh
+= Solution Pattern: Comprehensive Service Architecture with API Management and Service Mesh
 :sectnums:
 :sectlinks:
 :doctype: book
