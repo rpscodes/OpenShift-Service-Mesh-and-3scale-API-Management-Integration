@@ -20,9 +20,9 @@ A service mesh
 
 * creates a centralized point of control in an application
 * adds a transparent layer on existing distributed applications without requiring any changes to the application code
-* provides more complex operational functionality, including A/B testing, canary releases, access control, and end-to-end authentication.  
+* provides more complex operational functionality, including A/B testing, canary releases, access control, and end-to-end authentication.
 
- Service meshes manage the east-west type of network communications. East-west traffic indicates a traffic flow inside a data center, Kubernetes cluster, or a distributed system.
+Service meshes manage the east-west type of network communications. East-west traffic indicates a traffic flow inside a data center, Kubernetes cluster, or a distributed system.
 
 image::02-arch-servicemesh-ew.png[width=300]  
 
