@@ -20,7 +20,7 @@ This section shows you how you can set up the different parts of the solution pa
 video::5odpHSBI0Sc[youtube, width=800, height=480]
 You will need the following prerequisites:
 
-* Access to an OpenShift environment (preferably 4.10), with cluster-admin privileges. This pattern 
+* Access to an OpenShift environment (preferably 4.12), with cluster-admin privileges. This pattern 
 * OpenShift CLI 
 * Ansible Installed on your local machine
 ** Follow this https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html[guide^] to install Ansible if you haven't already done so
@@ -194,7 +194,7 @@ NOTE: On examining the external virtual service yaml available https://raw.githu
 [.console-input]
 [source, weblink,subs="+macros,+attributes"]
 ----
-http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/travels/Kiev
+https://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/travels/Kiev
 ----
 +
 image::browser-api.png[browser-api]
@@ -209,7 +209,7 @@ TIP: If you do not see the API response in the browser try replacing https with 
 [.console-input]
 [source, bash,subs="+macros,+attributes"]
 ----
-curl http://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/travels/Kiev?[1-50++]++
+curl https://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/travels/Kiev?[1-50++]++
 ----
 
 * Navigate back to your graph on https://kiali-istio-system.%CLUSTER_WILDCARD_URL%[Kiali] UI and you'll notice that the external traffic coming from the istio-ingress-gateway starts to flow through v2 in a few seconds 
@@ -229,13 +229,13 @@ In this scenario let's assume we have a partner application that wants to access
 
 image::architecture-step3.png[architecture-step3]
 
-* Navigate to http://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%[Red Company App] using this link. 
+* Navigate to https://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%[Red Company App] using this link. 
 +
 [.lines_7]
 [.console-input]
 [source, weblink,subs="+macros,+attributes"]
 ----
-http://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%
+https://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%
 ----
 
 * Try to choose a city from the drop down to get the hotels, cars, flights information for that city. You will notice that the city drop down is not showing any values. Let's investigate on what's happening. 
@@ -303,20 +303,20 @@ image::api-key-location.png[api-key-location]
 +
 image::add-secret.png[add-secret]
 
-* Navigate again to http://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%[Red Company App] using this link. 
+* Navigate again to https://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%[Red Company App] using this link. 
 +
 [.lines_7]
 [.console-input]
 [source, weblink,subs="+macros,+attributes"]
 ----
-http://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%
+https://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%
 ----
 
 * Since we have provided the API key, we should now be able to select a city from the dropdown and get details of the hotels, flights, cars etc that are relevant to that city. 
 +
 image::red-app-works-new.gif[red-app-works-new]
 
-* Two other similar partner apps http://travels-green-ui-green-portal.%CLUSTER_WILDCARD_URL%[Green App] and http://travels-blue-ui-blue-portal.%CLUSTER_WILDCARD_URL%[Blue App] have already been deployed 
+* Two other similar partner apps https://travels-green-ui-green-portal.%CLUSTER_WILDCARD_URL%[Green App] and https://travels-blue-ui-blue-portal.%CLUSTER_WILDCARD_URL%[Blue App] have already been deployed 
 +
 image::green-app-new.png[green-app-new]
 +
@@ -385,7 +385,11 @@ The travels-portal and travel-agency are two such LOBs that are part of the Trav
 
 image::architecture-step4.png[architecture-step4]
 
-The ServiceMeshExtension custom resource spec provides the configuration that the integration module reads from. The spec is embedded in the host and read by the module. Follow the below steps to configure the  ServiceMeshExtension. *This will setup the API management control plane for us.* 
+The _threescale-wasm-auth_ module is a WebAssembly module that uses a set of interfaces, known as an application binary interfaces (ABI). This is defined by the Proxy-WASM specification to drive any piece of software that implements the ABI so it can authorize HTTP requests against 3scale.
+
+Service Mesh provides a custom resource definition to specify and apply Proxy-WASM extensions to sidecar proxies, known as WasmPlugin. Service Mesh applies this custom resource to the set of workloads that require HTTP API management with 3scale.
+
+Follow the below steps to configure the WasmPlugin and integration between 3scale and Service Mesh. 
 
 * Obtain the 'Admin Access Token'  by running this command. Note down the *Admin_Access_Token*
 +
@@ -396,12 +400,12 @@ The ServiceMeshExtension custom resource spec provides the configuration that th
 oc get secret -n 3scale system-seed -o json | jq -r .data.ADMIN_ACCESS_TOKEN | base64 -d
 ----
 
-* The *service token* will enable the permission for service mesh to be able to access a particular 3scale product. From the 3scale admin-portal navigate to  *Account Settings > Personal > Tokens* and copy the Service Token of the *Travel Demo Internal Product* 
+* The *service token* will enable the permission for service mesh to be able to access a particular 3scale product. From the https://3scale-admin.%CLUSTER_WILDCARD_URL%/p/admin/user/access_tokens[3scale admin-portal] navigate to  *Account Settings > Personal > Tokens* and copy the Service Token of the *Travel Demo Internal Product* 
 +
 image::service-token-ui.png[service-token-ui]
 
 
-* Create a Custom Resource Definition file for the Service Mesh Extension with name `sme-internal.yaml` using vim or any other editor on your OC CLI terminal. Press _i_ to go into the insert mode
+* Create a Custom Resource Definition file for the WasmPlugin with name `wasm-internal.yaml` using vim or any other editor on your OC CLI terminal. Press _i_ to go into the insert mode
 
 * Copy paste the below yaml into the file and replace the *access token*, *service token* values as shown in the image below and save it. To save the file (if using vim), hit *esc* followed by *:* followed by *wq* followed by *enter* to save
 +
@@ -409,20 +413,19 @@ image::service-token-ui.png[service-token-ui]
 [.console-input]
 [source, yaml,subs="+macros,+attributes"]
 ----
-apiVersion: maistra.io/v1
-kind: ServiceMeshExtension
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
 metadata:
- name: travel-agency-internal
- namespace: travel-agency
+ name: travel-agency
 spec:
- image: 'registry.redhat.io/openshift-service-mesh/3scale-auth-wasm-rhel8:0.0.1'
- phase: PostAuthZ
+ url: oci://quay.io/3scale/threescale-wasm-auth:v1.0.0
+ phase: AUTHZ
  priority: 100
- workloadSelector:
-   labels:
+ selector:
+   matchLabels:
      app: travels
      version: v1
- config:
+ pluginConfig:
    api: v1
    system:
      name: system
@@ -476,7 +479,7 @@ spec:
                name: hits
 ----
 +
-image::sme-internal.png[sme-internal]
+image::wasm-plugin-internal.png[wasm-internal]
 
 * Apply the CRD to your cluster using the below command
 +
@@ -484,7 +487,7 @@ image::sme-internal.png[sme-internal]
 [.console-input]
 [source, bash,subs="+macros,+attributes"]
 ----
-oc apply -f sme-internal.yaml
+oc apply -f wasm-internal.yaml
 ----
 
 * Wait for a couple of minutes and navigate back to your https://kiali-istio-system.%CLUSTER_WILDCARD_URL%[Kiali] console. You will notice that the traffic stops flowing  from the portals to the agency APIs as we just enabled authentication for them and none of the portals are sending in authenticated requests
@@ -539,23 +542,17 @@ image::double-click-viaggi.png[double-click-viaggi]
 +
 image::viaggi-green.png[viaggi-green]
 
-
-* Repeat the same steps of adding the `API_USER_KEY_NAME and 
-API_USER_KEY_VALUE` to the other two internal portals i.e. *voyages* and *travels* deployments and wait for a couple of minutes.
+* For the other two portal aka *travels* and *voyages* you can use the below commands to set their respective api keys as environment variables using cli
 +
-Values for travels portal:
-+
-`API_USER_KEY_NAME` : `user_key`
-+
-`API_USER_KEY_VALUE`: `travelsecret`
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+oc set env deployment/voyages API_USER_KEY_NAME=user_key API_USER_KEY_VALUE=voyagessecret -n travel-portal
+oc set env deployment/travels API_USER_KEY_NAME=user_key API_USER_KEY_VALUE=travelsecret -n travel-portal
+---- 
 +
 image::travels-environment-vars.png[travels-environment-vars]
-+
-Values for voyages portal
-+
-`API_USER_KEY_NAME` : `user_key`
-+
-`API_USER_KEY_VALUE`: `voyagessecret`
 +
 image::voyages-environment-vars.png[voyages-environment-vars]
 
