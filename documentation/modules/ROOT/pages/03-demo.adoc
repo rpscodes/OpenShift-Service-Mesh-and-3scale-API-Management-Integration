@@ -487,7 +487,7 @@ image::wasm-plugin-internal.png[wasm-internal]
 [.console-input]
 [source, bash,subs="+macros,+attributes"]
 ----
-oc apply -f wasm-internal.yaml
+oc apply -f wasm-internal.yaml -n travel-agency
 ----
 
 * Wait for a couple of minutes and navigate back to your https://kiali-istio-system.%CLUSTER_WILDCARD_URL%[Kiali] console. You will notice that the traffic stops flowing  from the portals to the agency APIs as we just enabled authentication for them and none of the portals are sending in authenticated requests
