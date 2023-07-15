@@ -421,6 +421,8 @@ spec:
  url: oci://quay.io/3scale/threescale-wasm-auth:v1.0.0
  phase: AUTHZ
  priority: 100
+ match:
+   - mode: SERVER
  selector:
    matchLabels:
      app: travels
