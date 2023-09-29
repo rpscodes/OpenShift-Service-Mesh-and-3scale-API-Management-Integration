@@ -76,7 +76,7 @@ OpenShift Service Mesh helps to connect, manage, and observe microservices-based
 Red Hat 3scale API Management makes it easy to manage your APIs for internal or external users. 
 
 * onboarding new APIs is rapid and easy
-* a custom developer portal and interactive API documentation based on OpenAPI specis provide an easy ay for developers to sign for APIs
+* a custom developer portal and interactive API documentation based on OpenAPI specs provide an easy way for developers to sign for APIs
 * in built analytics, monetization
 * access Control and Security, and setup rate limits   + 
 
