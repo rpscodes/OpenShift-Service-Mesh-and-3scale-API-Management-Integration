@@ -8,11 +8,6 @@ API-centric and microservices-based IT architectures improve speed, agility, and
 
 This solution pattern helps you understand how to use these solutions together to setup a comprehensive service management architecture.
 
-:sectnums:
-
-
-include::content-overview.adoc[]
-
 [#use-cases]
 == Use cases
 
