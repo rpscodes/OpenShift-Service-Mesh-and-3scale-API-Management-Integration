@@ -2,9 +2,11 @@ runtime:
   cache_dir: ./.cache/antora
 
 site:
-  title: OpenShift-Service-Mesh-and-3scale-API-Management-Integration
-  url: http://redhat-scholars.github.io/openshift-starter-guides/
-  start_page: rhs-openshift-starter-guides::introduction.adoc
+  title: Solution Patterns from Red Hat
+  url: https://redhat-solution-patterns.github.io/solution-patterns/
+  start_page: solution-pattern-template::index.adoc
+  keys:
+    google_analytics: 'G-H57ZC00J87'
 
 content:
   sources:
@@ -24,7 +26,7 @@ asciidoc:
 
 ui:
   bundle:
-    url: https://github.com/redhat-scholars/course-ui/releases/download/v0.1.8/ui-bundle.zip
+    url: https://github.com/redhat-solution-patterns/course-ui/releases/download/v0.1.16/ui-bundle.zip
     snapshot: true
   supplemental_files: ./supplemental-ui
 

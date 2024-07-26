@@ -1,0 +1,13 @@
+= Solution Pattern: A comprehensive service architecture API Management and Service Mesh
+:sectnums:
+:sectlinks:
+:doctype: book
+
+= Workshop
+
+what is this workshop and what will be learned
+
+== Installing the workshop environment
+=== Before getting started
+=== Installing the environment
+== Delivering the workshop
