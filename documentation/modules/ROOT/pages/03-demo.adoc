@@ -229,6 +229,27 @@ In this scenario let's assume we have a partner application that wants to access
 
 image::architecture-step3.png[architecture-step3]
 
+* Delete the unsecure external route
++
+[.lines_7]
+[.console-input]
+[source, bash,subs="+macros,+attributes"]
+----
+oc delete route istio-ingressgateway -n istio-system
+----
+
+* Try to access the API again from the external route by clicking below and you should now see a message that the api is unavilable at that URL since we deleted the route.
++
+[.lines_7]
+[.console-input]
+[source, weblink,subs="+macros,+attributes"]
+----
+https://istio-ingressgateway-istio-system.%CLUSTER_WILDCARD_URL%/travels/Kiev
+----
++
+image::app_unavailable.png[app_unavailable]
+
+
 * Navigate to https://travels-red-ui-red-portal.%CLUSTER_WILDCARD_URL%[Red Company App] using this link. 
 +
 [.lines_7]
@@ -286,7 +307,7 @@ image::apicast-gateway.png[apicast-gateway]
 
 * *Optional* : Navigate to *Integration > Backends*. This is where we provide the base URLs of all the API backends that need to be protected by Red Hat 3scale. 
 +
-image::backend-url.png[backend-url]
+image::backend_url.png[backend_url]
 
 
 * Navigate to *Applications > Listing > Select the Red App* .  
